@@ -201,7 +201,9 @@ export const useFitLog = () => {
     }
 
     const periodWorkouts = getWorkoutsByPeriod(start, end);
-    const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const today = new Date();
+    const endDate = end > today ? today : end; // Não contar dias futuros
+    const totalDays = Math.ceil((endDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
     const workoutDays = new Set(periodWorkouts.map(w => format(w.date, 'yyyy-MM-dd'))).size;
     
     // Tipo mais frequente
@@ -216,11 +218,14 @@ export const useFitLog = () => {
     // Calcular streak (sequência de dias consecutivos)
     const streak = calculateStreak(workouts, date);
 
+    // Calcular dias perdidos (apenas dias passados sem treino)
+    const lostDays = Math.max(0, totalDays - workoutDays);
+
     const stats: WorkoutStats = {
       totalWorkouts: periodWorkouts.length,
       workoutDays,
       restDays: totalDays - workoutDays,
-      lostDays: totalDays - workoutDays, // Dias perdidos (mesma lógica que restDays)
+      lostDays,
       mostFrequentType,
       streak,
       percentage: totalDays > 0 ? Math.round((workoutDays / totalDays) * 100) : 0,
@@ -296,6 +301,56 @@ export const useFitLog = () => {
     }));
   }, [workouts, workoutTypes, getWorkoutsByPeriod]);
 
+  // Obter distribuição por dia da semana
+  const getWeekdayDistribution = useCallback((period: 'month' | 'year', date: Date = new Date()) => {
+    let start: Date, end: Date;
+    
+    switch (period) {
+      case 'month':
+        start = startOfMonth(date);
+        end = endOfMonth(date);
+        break;
+      case 'year':
+        start = startOfYear(date);
+        end = endOfYear(date);
+        break;
+    }
+
+    const periodWorkouts = getWorkoutsByPeriod(start, end);
+    
+    const weekdays = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+    const distribution = weekdays.map(name => ({ name, value: 0, color: 'hsl(var(--primary))', icon: '📅' }));
+    
+    periodWorkouts.forEach(workout => {
+      const dayOfWeek = workout.date.getDay();
+      const index = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Ajustar para começar na segunda
+      distribution[index].value++;
+    });
+
+    return distribution;
+  }, [getWorkoutsByPeriod]);
+
+  // Obter distribuição por mês (apenas para período anual)
+  const getMonthDistribution = useCallback((date: Date = new Date()) => {
+    const start = startOfYear(date);
+    const end = endOfYear(date);
+    const periodWorkouts = getWorkoutsByPeriod(start, end);
+    
+    const months = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+    
+    const distribution = months.map(name => ({ name, value: 0, color: 'hsl(var(--primary))', icon: '📅' }));
+    
+    periodWorkouts.forEach(workout => {
+      const month = workout.date.getMonth();
+      distribution[month].value++;
+    });
+
+    return distribution;
+  }, [getWorkoutsByPeriod]);
+
   return {
     // Estado
     workouts,
@@ -312,6 +367,8 @@ export const useFitLog = () => {
     getWorkoutsByPeriod,
     getStats,
     getTypeDistribution,
+    getWeekdayDistribution,
+    getMonthDistribution,
     
     // Utilitários
     calculateStreak,

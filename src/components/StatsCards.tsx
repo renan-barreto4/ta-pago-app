@@ -13,10 +13,12 @@ export const StatsCards = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('week');
   const [currentDate, setCurrentDate] = useState(new Date());
   
-  const { getStats, getTypeDistribution } = useFitLog();
+  const { getStats, getTypeDistribution, getWeekdayDistribution, getMonthDistribution } = useFitLog();
 
   const stats = getStats(selectedPeriod, currentDate);
   const distribution = getTypeDistribution(selectedPeriod, currentDate);
+  const weekdayDistribution = selectedPeriod !== 'week' ? getWeekdayDistribution(selectedPeriod, currentDate) : [];
+  const monthDistribution = selectedPeriod === 'year' ? getMonthDistribution(currentDate) : [];
 
   const periods = [
     { key: 'week', label: 'Semana', icon: Calendar },
@@ -180,6 +182,68 @@ export const StatsCards = () => {
                       className="h-full rounded-full transition-all duration-300"
                       style={{ 
                         width: `${(item.value / Math.max(...distribution.map(d => d.value))) * 100}%`,
+                        backgroundColor: item.color 
+                      }}
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-foreground min-w-[20px]">
+                    {item.value}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Distribuição por dia da semana (apenas para mês e ano) */}
+      {weekdayDistribution.length > 0 && weekdayDistribution.some(item => item.value > 0) && (
+        <Card className="p-4 bg-gradient-card shadow-card">
+          <h4 className="font-semibold text-foreground mb-4">Treinos por Dia da Semana</h4>
+          <div className="space-y-3">
+            {weekdayDistribution.map((item, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{item.icon}</span>
+                  <span className="text-sm font-medium text-foreground">{item.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
+                    <div 
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{ 
+                        width: `${weekdayDistribution.length > 0 ? (item.value / Math.max(...weekdayDistribution.map(d => d.value))) * 100 : 0}%`,
+                        backgroundColor: item.color 
+                      }}
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-foreground min-w-[20px]">
+                    {item.value}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Distribuição por mês (apenas para ano) */}
+      {monthDistribution.length > 0 && monthDistribution.some(item => item.value > 0) && (
+        <Card className="p-4 bg-gradient-card shadow-card">
+          <h4 className="font-semibold text-foreground mb-4">Treinos por Mês</h4>
+          <div className="space-y-3">
+            {monthDistribution.map((item, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{item.icon}</span>
+                  <span className="text-sm font-medium text-foreground">{item.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
+                    <div 
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{ 
+                        width: `${monthDistribution.length > 0 ? (item.value / Math.max(...monthDistribution.map(d => d.value))) * 100 : 0}%`,
                         backgroundColor: item.color 
                       }}
                     />
