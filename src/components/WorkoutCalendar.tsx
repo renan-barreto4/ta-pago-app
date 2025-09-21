@@ -31,7 +31,7 @@ export const WorkoutCalendar = ({ onDateSelect, selectedDate }: WorkoutCalendarP
   const getDayStatus = (date: Date) => {
     const workout = getWorkoutByDate(date);
     const today = isToday(date);
-    const isPast = isBefore(endOfMonth(date), startOfDay(new Date()));
+    const isPast = isBefore(date, startOfDay(new Date())) && !today;
     
     if (workout) {
       const type = workoutTypes.find(t => t.id === workout.typeId);
@@ -52,7 +52,7 @@ export const WorkoutCalendar = ({ onDateSelect, selectedDate }: WorkoutCalendarP
       };
     }
     
-    if (isPast && !workout) {
+    if (isPast) {
       return {
         hasWorkout: false,
         icon: '',
@@ -64,7 +64,7 @@ export const WorkoutCalendar = ({ onDateSelect, selectedDate }: WorkoutCalendarP
     return {
       hasWorkout: false,
       icon: '',
-      color: 'muted',
+      color: 'default',
       label: 'Disponível'
     };
   };
@@ -130,8 +130,8 @@ export const WorkoutCalendar = ({ onDateSelect, selectedDate }: WorkoutCalendarP
                   // Status do dia
                   "bg-workout-completed text-white shadow-workout": dayStatus.color === 'workout-completed',
                   "bg-workout-today text-white": dayStatus.color === 'workout-today',
-                  "bg-muted text-muted-foreground": dayStatus.color === 'muted',
                   "bg-destructive text-white": dayStatus.color === 'workout-missed',
+                  "bg-background hover:bg-accent": dayStatus.color === 'default',
                   
                   // Selecionado
                   "ring-2 ring-primary ring-offset-2": isSelected,

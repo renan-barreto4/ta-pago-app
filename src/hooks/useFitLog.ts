@@ -40,11 +40,15 @@ const DEFAULT_WORKOUT_TYPES: WorkoutType[] = [
   { id: 'custom', name: 'Outro', icon: '⚡', color: 'hsl(220 9% 46%)' },
 ];
 
-// Mock de dados iniciais para demonstração
+// Mock de dados iniciais para demonstração (usando datas do mês atual)
+const now = new Date();
+const currentYear = now.getFullYear();
+const currentMonth = now.getMonth();
+
 const MOCK_WORKOUTS: Workout[] = [
   {
     id: '1',
-    date: new Date(2024, 11, 20), // 20 de dezembro
+    date: new Date(currentYear, currentMonth, 20), // Dia 20 do mês atual
     typeId: '1',
     notes: 'Treino de peito e tríceps',
     createdAt: new Date(),
@@ -52,7 +56,7 @@ const MOCK_WORKOUTS: Workout[] = [
   },
   {
     id: '2',
-    date: new Date(2024, 11, 19), // 19 de dezembro
+    date: new Date(currentYear, currentMonth, 18), // Dia 18 do mês atual
     typeId: '2',
     notes: '30 minutos na esteira',
     createdAt: new Date(),
@@ -60,7 +64,7 @@ const MOCK_WORKOUTS: Workout[] = [
   },
   {
     id: '3',
-    date: new Date(2024, 11, 18), // 18 de dezembro
+    date: new Date(currentYear, currentMonth, 15), // Dia 15 do mês atual
     typeId: '3',
     notes: 'Aula de yoga matinal',
     createdAt: new Date(),
@@ -68,7 +72,7 @@ const MOCK_WORKOUTS: Workout[] = [
   },
   {
     id: '4',
-    date: new Date(2024, 11, 16), // 16 de dezembro
+    date: new Date(currentYear, currentMonth, 12), // Dia 12 do mês atual
     typeId: '1',
     notes: 'Treino de costas e bíceps',
     createdAt: new Date(),
@@ -76,7 +80,7 @@ const MOCK_WORKOUTS: Workout[] = [
   },
   {
     id: '5',
-    date: new Date(2024, 11, 15), // 15 de dezembro
+    date: new Date(currentYear, currentMonth, 10), // Dia 10 do mês atual
     typeId: 'custom',
     customType: 'Dança',
     notes: 'Aula de salsa',
