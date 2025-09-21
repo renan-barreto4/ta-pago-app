@@ -133,7 +133,7 @@ export const WorkoutTypes = () => {
           </Button>
         </DialogTrigger>
         
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md mx-4 max-w-[calc(100vw-2rem)]">
           <DialogHeader>
             <DialogTitle>
               {editingType ? 'Editar Tipo de Treino' : 'Novo Tipo de Treino'}
@@ -154,15 +154,15 @@ export const WorkoutTypes = () => {
 
               <div className="space-y-2">
                 <Label>Emoji</Label>
-                <div className="grid grid-cols-10 gap-2">
+                <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
                   {EMOJI_OPTIONS.map((emoji) => (
                     <button
                       key={emoji}
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, icon: emoji }))}
-                      className={`p-2 text-lg rounded-md border transition-all ${
+                      className={`p-3 text-lg rounded-md border transition-all hover:scale-105 ${
                         formData.icon === emoji
-                          ? 'border-primary bg-primary/10'
+                          ? 'border-primary bg-primary/10 scale-105'
                           : 'border-border hover:border-primary/50'
                       }`}
                     >
