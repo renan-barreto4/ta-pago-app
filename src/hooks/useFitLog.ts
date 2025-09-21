@@ -22,6 +22,7 @@ export interface WorkoutStats {
   totalWorkouts: number;
   workoutDays: number;
   restDays: number;
+  lostDays: number;
   mostFrequentType: string;
   streak: number;
   percentage: number;
@@ -219,6 +220,7 @@ export const useFitLog = () => {
       totalWorkouts: periodWorkouts.length,
       workoutDays,
       restDays: totalDays - workoutDays,
+      lostDays: totalDays - workoutDays, // Dias perdidos (mesma lógica que restDays)
       mostFrequentType,
       streak,
       percentage: totalDays > 0 ? Math.round((workoutDays / totalDays) * 100) : 0,

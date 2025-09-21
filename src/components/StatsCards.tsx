@@ -108,7 +108,7 @@ export const StatsCards = () => {
       </Card>
 
       {/* Cards de estatísticas */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         {/* Total de treinos */}
         <Card className="p-4 bg-gradient-card shadow-card">
           <div className="flex items-center gap-3">
@@ -122,7 +122,20 @@ export const StatsCards = () => {
           </div>
         </Card>
 
-        {/* Percentual */}
+        {/* Dias perdidos */}
+        <Card className="p-4 bg-gradient-card shadow-card">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-destructive/10">
+              <Calendar className="h-5 w-5 text-destructive" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-foreground">{stats.lostDays}</p>
+              <p className="text-sm text-muted-foreground">Dias perdidos</p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Consistência */}
         <Card className="p-4 bg-gradient-card shadow-card">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-success/10">
@@ -147,28 +160,8 @@ export const StatsCards = () => {
             </div>
           </div>
         </Card>
-
-        {/* Dias de treino */}
-        <Card className="p-4 bg-gradient-card shadow-card">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-workout-today/10">
-              <Calendar className="h-5 w-5 text-workout-today" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-foreground">{stats.workoutDays}</p>
-              <p className="text-sm text-muted-foreground">Dias ativos</p>
-            </div>
-          </div>
-        </Card>
       </div>
 
-      {/* Tipo mais frequente */}
-      {stats.mostFrequentType !== 'Nenhum' && (
-        <Card className="p-4 bg-gradient-card shadow-card">
-          <h4 className="font-semibold text-foreground mb-2">Tipo Mais Frequente</h4>
-          <p className="text-lg font-medium text-primary">{stats.mostFrequentType}</p>
-        </Card>
-      )}
 
       {/* Distribuição por tipo */}
       {distribution.length > 0 && (
