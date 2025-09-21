@@ -60,7 +60,8 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
         variant: "destructive",
         title: "Erro",
         description: "Você precisa escolher um tipo de treino",
-        className: "border-destructive",
+        className: "border-red-600 bg-red-50 text-red-900",
+        duration: 3000,
       });
       return;
     }
@@ -70,7 +71,8 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
         variant: "destructive",
         title: "Erro",
         description: "Descreva o tipo de treino personalizado",
-        className: "border-destructive",
+        className: "border-red-600 bg-red-50 text-red-900",
+        duration: 3000,
       });
       return;
     }
@@ -92,7 +94,8 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
         toast({
           title: "Treino registrado!",
           description: "Parabéns por manter a consistência",
-          className: "border-green-500 bg-green-50 text-green-900",
+          className: "border-green-600 bg-green-50 text-green-900",
+          duration: 3000,
         });
       }
 
