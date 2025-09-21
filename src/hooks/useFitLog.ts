@@ -454,11 +454,6 @@ export const useFitLog = () => {
       // Simular delay da API
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      // Não permitir remover tipos padrão
-      if (['1', '2', '3', '4', '5', '6', '7', '8', 'custom'].includes(id)) {
-        throw new Error('Não é possível remover tipos de treino padrão');
-      }
-      
       setWorkoutTypes(prev => prev.filter(type => type.id !== id));
       setIsLoading(false);
     } catch (error) {

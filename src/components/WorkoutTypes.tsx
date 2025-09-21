@@ -120,25 +120,24 @@ export const WorkoutTypes = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">Tipos de Treino</h2>
-          <p className="text-muted-foreground">Gerencie os tipos de treino disponíveis</p>
-        </div>
+      <div>
+        <h2 className="text-2xl font-bold text-foreground">Tipos de Treino</h2>
+        <p className="text-muted-foreground">Gerencie os tipos de treino disponíveis</p>
+      </div>
+      
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogTrigger asChild>
+          <Button onClick={() => handleOpenModal()} className="bg-gradient-primary shadow-workout">
+            <Plus className="h-4 w-4 mr-2" />
+            Adicione um Novo Treino
+          </Button>
+        </DialogTrigger>
         
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => handleOpenModal()} className="bg-gradient-primary shadow-workout">
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Tipo
-            </Button>
-          </DialogTrigger>
-          
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>
-                {editingType ? 'Editar Tipo de Treino' : 'Novo Tipo de Treino'}
-              </DialogTitle>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editingType ? 'Editar Tipo de Treino' : 'Novo Tipo de Treino'}
+            </DialogTitle>
             </DialogHeader>
             
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -184,7 +183,6 @@ export const WorkoutTypes = () => {
             </form>
           </DialogContent>
         </Dialog>
-      </div>
 
       {/* Tipos Personalizados */}
       {customTypes.length > 0 && (
@@ -259,9 +257,21 @@ export const WorkoutTypes = () => {
           {defaultTypes.map((type) => (
             <Card key={type.id} className="shadow-workout">
               <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2">
-                  <span className="text-lg">{type.icon}</span>
-                  <span className="font-medium">{type.name}</span>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{type.icon}</span>
+                    <span className="font-medium">{type.name}</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleOpenModal(type)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>
