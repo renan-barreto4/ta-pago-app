@@ -75,7 +75,7 @@ export const WorkoutCalendar = ({ onDateSelect, selectedDate }: WorkoutCalendarP
     <Card className="p-6 bg-gradient-card shadow-card">
       {/* Header do calendário */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-foreground">
+        <h2 className="text-xl font-semibold text-foreground capitalize">
           {format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
         </h2>
         <div className="flex gap-2">

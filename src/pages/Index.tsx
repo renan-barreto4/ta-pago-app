@@ -69,32 +69,8 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Navigation Tabs */}
-      <nav className="bg-card border-b border-border">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex space-x-1">
-            {tabs.map(({ key, label, icon: Icon }) => (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key)}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all duration-200",
-                  "border-b-2 hover:text-primary",
-                  activeTab === key
-                    ? "border-primary text-primary bg-primary/5"
-                    : "border-transparent text-muted-foreground hover:border-primary/50"
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </nav>
-
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 py-6">
+      <main className="max-w-6xl mx-auto px-4 py-6 pb-20">
         {activeTab === 'calendar' && (
           <div className="space-y-6">
             <WorkoutCalendar 
@@ -111,6 +87,28 @@ const Index = () => {
         )}
       </main>
 
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 safe-area-inset-bottom">
+        <div className="flex">
+          {tabs.map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={cn(
+                "flex-1 flex flex-col items-center gap-1 px-2 py-3 text-xs font-medium transition-all duration-200",
+                "min-h-[60px] justify-center",
+                activeTab === key
+                  ? "text-primary bg-primary/10"
+                  : "text-muted-foreground hover:text-primary hover:bg-primary/5"
+              )}
+            >
+              <Icon className="h-5 w-5" />
+              <span className="leading-tight">{label}</span>
+            </button>
+          ))}
+        </div>
+      </nav>
+
       {/* Modal */}
       <WorkoutModal
         isOpen={isModalOpen}
@@ -119,6 +117,7 @@ const Index = () => {
         existingWorkout={editingWorkout}
       />
     </div>
+
   );
 };
 
