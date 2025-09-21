@@ -17,7 +17,7 @@ export const StatsCards = () => {
 
   const stats = getStats(selectedPeriod, currentDate);
   const distribution = getTypeDistribution(selectedPeriod, currentDate);
-  const weekdayDistribution = selectedPeriod !== 'week' ? getWeekdayDistribution(selectedPeriod, currentDate) : [];
+  const weekdayDistribution = (selectedPeriod === 'week' || selectedPeriod === 'month' || selectedPeriod === 'year') ? getWeekdayDistribution(selectedPeriod, currentDate) : [];
   const monthDistribution = selectedPeriod === 'year' ? getMonthDistribution(currentDate) : [];
 
   const periods = [
@@ -61,9 +61,9 @@ export const StatsCards = () => {
     <div className="space-y-6">
       {/* Seletor de período */}
       <Card className="p-4 bg-gradient-card shadow-card">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col gap-4">
           <h3 className="text-lg font-semibold text-foreground">Estatísticas</h3>
-          <div className="flex gap-1">
+          <div className="flex flex-col sm:flex-row gap-2">
             {periods.map(({ key, label, icon: Icon }) => (
               <Button
                 key={key}
@@ -74,7 +74,7 @@ export const StatsCards = () => {
                   setCurrentDate(new Date());
                 }}
                 className={cn(
-                  "h-8 px-3",
+                  "h-8 px-3 flex-1 min-w-0",
                   selectedPeriod === key && "bg-gradient-primary"
                 )}
               >
@@ -86,17 +86,17 @@ export const StatsCards = () => {
         </div>
 
         {/* Navegação de período */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => navigatePeriod('prev')}
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 shrink-0"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
           
-          <h4 className="font-medium text-foreground capitalize">
+          <h4 className="font-medium text-foreground capitalize text-center text-xs sm:text-sm truncate px-1">
             {formatPeriodTitle()}
           </h4>
           
@@ -104,7 +104,7 @@ export const StatsCards = () => {
             variant="outline"
             size="sm"
             onClick={() => navigatePeriod('next')}
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 shrink-0"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -198,7 +198,7 @@ export const StatsCards = () => {
         </Card>
       )}
 
-      {/* Distribuição por dia da semana (apenas para mês e ano) */}
+      {/* Distribuição por dia da semana (para semana, mês e ano) */}
       {weekdayDistribution.length > 0 && weekdayDistribution.some(item => item.value > 0) && (
         <Card className="p-4 bg-gradient-card shadow-card">
           <h4 className="font-semibold text-foreground mb-4">Treinos por Dia da Semana</h4>

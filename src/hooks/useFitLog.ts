@@ -351,10 +351,14 @@ export const useFitLog = () => {
   }, [workouts, workoutTypes, getWorkoutsByPeriod]);
 
   // Obter distribuição por dia da semana
-  const getWeekdayDistribution = useCallback((period: 'month' | 'year', date: Date = new Date()) => {
+  const getWeekdayDistribution = useCallback((period: 'week' | 'month' | 'year', date: Date = new Date()) => {
     let start: Date, end: Date;
     
     switch (period) {
+      case 'week':
+        start = startOfWeek(date, { weekStartsOn: 1 });
+        end = endOfWeek(date, { weekStartsOn: 1 });
+        break;
       case 'month':
         start = startOfMonth(date);
         end = endOfMonth(date);

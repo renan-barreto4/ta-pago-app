@@ -7,8 +7,9 @@ import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Calendar } from '@/components/ui/calendar';
+import { ProgressToast } from '@/components/ui/progress-toast';
 import { useFitLog, WorkoutType, Workout } from '@/hooks/useFitLog';
-import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 interface WorkoutModalProps {
@@ -22,14 +23,22 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
   const [selectedType, setSelectedType] = useState<string>('');
   const [customType, setCustomType] = useState('');
   const [notes, setNotes] = useState('');
+  const [workoutDate, setWorkoutDate] = useState<Date>(selectedDate || new Date());
   const [isLoading, setIsLoading] = useState(false);
+  const [showToast, setShowToast] = useState(false);
   
   const { workoutTypes, saveWorkout, updateWorkout, deleteWorkout } = useFitLog();
-  const { toast } = useToast();
 
   // Resetar formulário quando modal abre/fecha
   useEffect(() => {
     if (isOpen) {
+      // Sempre definir a data como hoje quando não há treino existente
+      if (!existingWorkout) {
+        setWorkoutDate(new Date());
+      } else {
+        setWorkoutDate(existingWorkout.date);
+      }
+      
       if (existingWorkout) {
         setSelectedType(existingWorkout.typeId);
         setCustomType(existingWorkout.customType || '');
@@ -44,20 +53,12 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
 
   const handleSave = async () => {
     if (!selectedType) {
-      toast({
-        title: "Tipo obrigatório",
-        description: "Selecione um tipo de treino",
-        variant: "destructive",
-      });
+      alert("Selecione um tipo de treino");
       return;
     }
 
     if (selectedType === 'custom' && !customType.trim()) {
-      toast({
-        title: "Especifique o treino",
-        description: "Descreva o tipo de treino personalizado",
-        variant: "destructive",
-      });
+      alert("Descreva o tipo de treino personalizado");
       return;
     }
 
@@ -65,7 +66,7 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
 
     try {
       const workoutData = {
-        date: selectedDate,
+        date: workoutDate,
         typeId: selectedType,
         customType: selectedType === 'custom' ? customType.trim() : undefined,
         notes: notes.trim() || undefined,
@@ -73,25 +74,14 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
 
       if (existingWorkout) {
         await updateWorkout(existingWorkout.id, workoutData);
-        toast({
-          title: "Treino atualizado!",
-          description: "Suas alterações foram salvas com sucesso",
-        });
       } else {
         await saveWorkout(workoutData);
-        toast({
-          title: "Treino registrado!",
-          description: "Parabéns por manter a consistência",
-        });
+        setShowToast(true);
       }
 
       onClose();
     } catch (error) {
-      toast({
-        title: "Erro ao salvar",
-        description: "Tente novamente em alguns instantes",
-        variant: "destructive",
-      });
+      console.error('Erro ao salvar treino:', error);
     } finally {
       setIsLoading(false);
     }
@@ -104,17 +94,9 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
 
     try {
       await deleteWorkout(existingWorkout.id);
-      toast({
-        title: "Treino excluído",
-        description: "O registro foi removido com sucesso",
-      });
       onClose();
     } catch (error) {
-      toast({
-        title: "Erro ao excluir",
-        description: "Tente novamente em alguns instantes",
-        variant: "destructive",
-      });
+      console.error('Erro ao excluir treino:', error);
     } finally {
       setIsLoading(false);
     }
@@ -123,12 +105,13 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Overlay */}
-      <div 
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
+    <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        {/* Overlay */}
+        <div 
+          className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          onClick={onClose}
+        />
       
       {/* Modal */}
       <Card className="relative z-10 w-full max-w-md mx-4 p-6 bg-card shadow-modal animate-scale-in">
@@ -139,7 +122,7 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
               {existingWorkout ? 'Editar Treino' : 'Registrar Treino'}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {format(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
+              {format(workoutDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
             </p>
           </div>
           <Button variant="outline" size="sm" onClick={onClose} className="h-8 w-8 p-0">
@@ -147,8 +130,21 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
           </Button>
         </div>
 
-        {/* Tipo de treino */}
+        {/* Data do treino */}
         <div className="space-y-4">
+          <div>
+            <Label className="text-sm font-medium text-foreground mb-3 block">
+              Data do Treino
+            </Label>
+            <Calendar
+              mode="single"
+              selected={workoutDate}
+              onSelect={(date) => date && setWorkoutDate(date)}
+              className="rounded-md border w-full"
+            />
+          </div>
+
+          {/* Tipo de treino */}
           <div>
             <Label className="text-sm font-medium text-foreground mb-3 block">
               Tipo de Treino
@@ -235,6 +231,17 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
           </Button>
         </div>
       </Card>
-    </div>
+      </div>
+
+      {/* Toast customizado */}
+      {showToast && (
+        <ProgressToast
+          title="Treino registrado!"
+          description="Parabéns por manter a consistência"
+          duration={3000}
+          onClose={() => setShowToast(false)}
+        />
+      )}
+    </>
   );
 };
