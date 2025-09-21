@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { X, Save, Trash2, CalendarIcon, Edit3 } from 'lucide-react';
+import { X, Save, Trash2, CalendarIcon, Edit3, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import { useToast } from '@/hooks/use-toast';
 import { ProgressToast } from '@/components/ui/progress-toast';
 import { useFitLog, WorkoutType, Workout } from '@/hooks/useFitLog';
 import { cn } from '@/lib/utils';
@@ -30,6 +31,7 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
   const [showDatePicker, setShowDatePicker] = useState(false);
   
   const { workoutTypes, saveWorkout, updateWorkout, deleteWorkout } = useFitLog();
+  const { toast } = useToast();
 
   // Resetar formulário quando modal abre/fecha
   useEffect(() => {
@@ -55,12 +57,22 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
 
   const handleSave = async () => {
     if (!selectedType) {
-      alert("Selecione um tipo de treino");
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Você precisa escolher um tipo de treino",
+        className: "border-destructive",
+      });
       return;
     }
 
     if (selectedType === 'custom' && !customType.trim()) {
-      alert("Descreva o tipo de treino personalizado");
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Descreva o tipo de treino personalizado",
+        className: "border-destructive",
+      });
       return;
     }
 
@@ -119,14 +131,9 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
       <Card className="relative z-10 w-full max-w-md mx-4 p-6 bg-card shadow-modal animate-scale-in">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">
-              {existingWorkout ? 'Editar Treino' : 'Registrar Treino'}
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              {format(workoutDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
-            </p>
-          </div>
+          <h3 className="text-lg font-semibold text-foreground">
+            {existingWorkout ? 'Editar Treino' : 'Registrar Treino'}
+          </h3>
           <Button variant="outline" size="sm" onClick={onClose} className="h-8 w-8 p-0">
             <X className="h-4 w-4" />
           </Button>

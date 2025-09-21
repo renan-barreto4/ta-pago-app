@@ -63,7 +63,7 @@ const Index = () => {
               className="bg-gradient-primary shadow-workout"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Novo Treino
+              Registrar Treino
             </Button>
           </div>
         </div>
