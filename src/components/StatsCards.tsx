@@ -74,7 +74,7 @@ export const StatsCards = () => {
                   setCurrentDate(new Date());
                 }}
                 className={cn(
-                  "h-8 px-3 flex-1 min-w-0",
+                  "h-10 px-4 py-2 flex-1 min-w-0",
                   selectedPeriod === key && "bg-gradient-primary"
                 )}
               >
@@ -86,6 +86,7 @@ export const StatsCards = () => {
         </div>
 
         {/* Navegação de período */}
+        <div className="mt-6">{/* Espaçamento extra */}</div>
         <div className="flex items-center justify-between gap-2">
           <Button
             variant="outline"
