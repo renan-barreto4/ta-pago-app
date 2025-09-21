@@ -97,7 +97,7 @@ export const StatsCards = () => {
             <ChevronLeft className="h-4 w-4" />
           </Button>
           
-          <h4 className="font-medium text-foreground capitalize text-center text-xs sm:text-sm truncate px-1">
+          <h4 className="font-medium text-foreground capitalize text-center text-sm sm:text-base truncate px-1">
             {formatPeriodTitle()}
           </h4>
           
