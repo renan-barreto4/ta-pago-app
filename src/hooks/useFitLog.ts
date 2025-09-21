@@ -65,6 +65,22 @@ const MOCK_WORKOUTS: Workout[] = [
   },
   {
     id: '3',
+    date: new Date(currentYear, currentMonth, 17), // Dia 17 do mês atual
+    typeId: '4',
+    notes: 'Natação',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: '4',
+    date: new Date(currentYear, currentMonth, 19), // Dia 19 do mês atual
+    typeId: '7',
+    notes: 'Treino funcional',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: '5',
     date: new Date(currentYear, currentMonth, 15), // Dia 15 do mês atual
     typeId: '3',
     notes: 'Aula de yoga matinal',
@@ -72,7 +88,7 @@ const MOCK_WORKOUTS: Workout[] = [
     updatedAt: new Date(),
   },
   {
-    id: '4',
+    id: '6',
     date: new Date(currentYear, currentMonth, 12), // Dia 12 do mês atual
     typeId: '1',
     notes: 'Treino de costas e bíceps',
@@ -80,7 +96,15 @@ const MOCK_WORKOUTS: Workout[] = [
     updatedAt: new Date(),
   },
   {
-    id: '5',
+    id: '7',
+    date: new Date(currentYear, currentMonth, 11), // Dia 11 do mês atual
+    typeId: '5',
+    notes: 'Corrida no parque',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: '8',
     date: new Date(currentYear, currentMonth, 10), // Dia 10 do mês atual
     typeId: 'custom',
     customType: 'Dança',
@@ -203,7 +227,7 @@ export const useFitLog = () => {
     const periodWorkouts = getWorkoutsByPeriod(start, end);
     const today = new Date();
     const endDate = end > today ? today : end; // Não contar dias futuros
-    const totalDays = Math.ceil((endDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const totalDays = Math.ceil((endDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
     const workoutDays = new Set(periodWorkouts.map(w => format(w.date, 'yyyy-MM-dd'))).size;
     
     // Tipo mais frequente

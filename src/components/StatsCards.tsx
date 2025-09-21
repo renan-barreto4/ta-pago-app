@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Calendar, Target, TrendingUp, Trophy, ChevronLeft, ChevronRight } from 'lucide-react';
-import { format, addWeeks, subWeeks, addMonths, subMonths, addYears, subYears } from 'date-fns';
+import { format, addWeeks, subWeeks, addMonths, subMonths, addYears, subYears, startOfWeek, endOfWeek } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,7 +45,9 @@ export const StatsCards = () => {
   const formatPeriodTitle = () => {
     switch (selectedPeriod) {
       case 'week':
-        return format(currentDate, "'Semana de' d 'de' MMMM", { locale: ptBR });
+        const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+        const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
+        return `De ${format(weekStart, 'd', { locale: ptBR })} à ${format(weekEnd, 'd')} de ${format(weekEnd, 'MMMM', { locale: ptBR })}`;
       case 'month':
         return format(currentDate, "MMMM 'de' yyyy", { locale: ptBR });
       case 'year':
