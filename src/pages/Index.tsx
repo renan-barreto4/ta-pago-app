@@ -41,8 +41,8 @@ const Index = () => {
   const tabs = [
     { key: 'calendar' as const, label: 'Calendário', icon: Calendar },
     { key: 'stats' as const, label: 'Estatísticas', icon: TrendingUp },
-    { key: 'history' as const, label: 'Histórico', icon: History },
     { key: 'types' as const, label: 'Treinos', icon: Dumbbell },
+    { key: 'history' as const, label: 'Histórico', icon: History },
   ];
 
   return (
