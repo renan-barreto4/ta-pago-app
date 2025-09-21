@@ -239,8 +239,8 @@ export const useFitLog = () => {
     
     const mostFrequentType = Object.entries(typeCount).sort(([,a], [,b]) => b - a)[0]?.[0] || 'Nenhum';
     
-    // Calcular streak (sequência de dias consecutivos)
-    const streak = calculateStreak(workouts, date);
+    // Calcular sequência máxima de treinos consecutivos no período
+    const streak = calculateMaxStreakInPeriod(periodWorkouts);
 
     // Calcular dias perdidos (apenas dias passados sem treino)
     const lostDays = Math.max(0, totalDays - workoutDays);
@@ -258,7 +258,32 @@ export const useFitLog = () => {
     return stats;
   }, [workouts, workoutTypes, getWorkoutsByPeriod]);
 
-  // Calcular sequência de dias consecutivos
+  // Calcular sequência máxima de treinos consecutivos no período
+  const calculateMaxStreakInPeriod = useCallback((periodWorkouts: Workout[]) => {
+    if (periodWorkouts.length === 0) return 0;
+
+    const sortedWorkouts = periodWorkouts.sort((a, b) => a.date.getTime() - b.date.getTime());
+    let maxStreak = 1;
+    let currentStreak = 1;
+
+    for (let i = 1; i < sortedWorkouts.length; i++) {
+      const currentDate = sortedWorkouts[i].date;
+      const previousDate = sortedWorkouts[i - 1].date;
+      
+      const daysDiff = Math.floor((currentDate.getTime() - previousDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (daysDiff === 1) {
+        currentStreak++;
+      } else {
+        maxStreak = Math.max(maxStreak, currentStreak);
+        currentStreak = 1;
+      }
+    }
+    
+    return Math.max(maxStreak, currentStreak);
+  }, []);
+
+  // Calcular sequência de dias consecutivos (mantida para compatibilidade)
   const calculateStreak = useCallback((allWorkouts: Workout[], fromDate: Date = new Date()) => {
     const sortedDates = allWorkouts
       .map(w => format(w.date, 'yyyy-MM-dd'))

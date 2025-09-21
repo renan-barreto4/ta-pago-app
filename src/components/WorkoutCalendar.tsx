@@ -129,7 +129,7 @@ export const WorkoutCalendar = ({ onDateSelect, selectedDate }: WorkoutCalendarP
                   
                   // Status do dia
                   "bg-workout-completed text-white shadow-workout": dayStatus.color === 'workout-completed',
-                  "border-2 border-primary bg-background text-foreground": dayStatus.color === 'workout-today',
+                  "border-2 border-blue-500 bg-background text-foreground": dayStatus.color === 'workout-today',
                   "bg-destructive text-white": dayStatus.color === 'workout-missed',
                   "bg-background hover:bg-accent": dayStatus.color === 'default',
                   
@@ -168,12 +168,12 @@ export const WorkoutCalendar = ({ onDateSelect, selectedDate }: WorkoutCalendarP
           <span className="text-muted-foreground">Treinou</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 rounded-full bg-workout-today" />
-          <span className="text-muted-foreground">Hoje</span>
-        </div>
-        <div className="flex items-center gap-1">
           <div className="w-3 h-3 rounded-full bg-destructive" />
           <span className="text-muted-foreground">Perdeu</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded-full bg-blue-500" />
+          <span className="text-muted-foreground">Hoje</span>
         </div>
       </div>
     </Card>
