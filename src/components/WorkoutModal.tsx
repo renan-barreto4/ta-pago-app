@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { X, Save, Trash2 } from 'lucide-react';
+import { X, Save, Trash2, CalendarIcon, Edit3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { ProgressToast } from '@/components/ui/progress-toast';
 import { useFitLog, WorkoutType, Workout } from '@/hooks/useFitLog';
@@ -26,6 +27,7 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
   const [workoutDate, setWorkoutDate] = useState<Date>(selectedDate || new Date());
   const [isLoading, setIsLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   
   const { workoutTypes, saveWorkout, updateWorkout, deleteWorkout } = useFitLog();
 
@@ -136,12 +138,38 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
             <Label className="text-sm font-medium text-foreground mb-3 block">
               Data do Treino
             </Label>
-            <Calendar
-              mode="single"
-              selected={workoutDate}
-              onSelect={(date) => date && setWorkoutDate(date)}
-              className="rounded-md border w-full"
-            />
+            <div className="flex items-center gap-2">
+              <div className="flex-1 p-3 bg-muted rounded-md">
+                <span className="text-sm font-medium text-foreground">
+                  {format(workoutDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                </span>
+              </div>
+              <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-10 w-10 p-0"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={workoutDate}
+                    onSelect={(date) => {
+                      if (date) {
+                        setWorkoutDate(date);
+                        setShowDatePicker(false);
+                      }
+                    }}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
 
           {/* Tipo de treino */}
