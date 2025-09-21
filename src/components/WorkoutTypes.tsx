@@ -9,7 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useFitLog } from '@/hooks/useFitLog';
 import { useToast } from '@/hooks/use-toast';
 
-const EMOJI_OPTIONS = ['🅰️', '🅱️', 'Ⓒ', 'Ⓓ', 'Ⓔ', 'Ⓕ', '🦵', '🔄', '🤷', '💪'];
+const EMOJI_OPTIONS = ['🅰️', '🅱️', 'Ⓒ', 'Ⓓ', 'Ⓔ', 'Ⓕ', '🦵', '🔄', '🤷', '💪', '🏃', '🧘', '🏊', '🚴', '🏋️', '🤸', '⚡', '🥊', '⛷️', '🏀', '⚽', '🎾', '🏐', '🏓', '🥋', '🤾', '🏆', '🔥', '💯'];
 
 export const WorkoutTypes = () => {
   const { workoutTypes, addWorkoutType, removeWorkoutType, updateWorkoutType } = useFitLog();
