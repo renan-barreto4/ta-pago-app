@@ -107,20 +107,40 @@ export const useFitLog = () => {
   const saveWorkout = useCallback(async (workoutData: Omit<Workout, 'id' | 'createdAt' | 'updatedAt'>) => {
     setIsLoading(true);
     
-    // Simular delay da API
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const newWorkout: Workout = {
-      ...workoutData,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    try {
+      // Simular delay da API
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Verificar se já existe treino na mesma data
+      const existingWorkout = workouts.find(w => isSameDay(w.date, workoutData.date));
+      
+      if (existingWorkout) {
+        // Atualizar treino existente
+        setWorkouts(prev => prev.map(workout => 
+          workout.id === existingWorkout.id 
+            ? { ...workout, ...workoutData, updatedAt: new Date() }
+            : workout
+        ));
+        setIsLoading(false);
+        return existingWorkout;
+      } else {
+        // Criar novo treino
+        const newWorkout: Workout = {
+          ...workoutData,
+          id: Date.now().toString(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
 
-    setWorkouts(prev => [...prev, newWorkout]);
-    setIsLoading(false);
-    return newWorkout;
-  }, []);
+        setWorkouts(prev => [...prev, newWorkout]);
+        setIsLoading(false);
+        return newWorkout;
+      }
+    } catch (error) {
+      setIsLoading(false);
+      throw error;
+    }
+  }, [workouts]);
 
   // Atualizar treino
   const updateWorkout = useCallback(async (id: string, workoutData: Partial<Omit<Workout, 'id' | 'createdAt'>>) => {
