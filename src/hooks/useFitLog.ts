@@ -326,7 +326,17 @@ export const useFitLog = () => {
     
     const distribution = periodWorkouts.reduce((acc, workout) => {
       const type = workout.customType || workoutTypes.find(t => t.id === workout.typeId)?.name || 'Outro';
-      const typeData = workoutTypes.find(t => t.name === type) || workoutTypes.find(t => t.id === 'custom')!;
+      let typeData = workoutTypes.find(t => t.name === type);
+      
+      // Fallback para casos onde o tipo não é encontrado (tipos removidos)
+      if (!typeData) {
+        typeData = {
+          id: 'fallback',
+          name: type,
+          icon: '⚡',
+          color: 'hsl(220 9% 46%)'
+        };
+      }
       
       if (!acc[type]) {
         acc[type] = {
