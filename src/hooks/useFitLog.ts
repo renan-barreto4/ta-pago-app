@@ -1,11 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, isSameDay } from 'date-fns';
 
+export interface Exercise {
+  id: string;
+  name: string;
+  sets: number;
+  reps: string; // Pode ser "10-12" ou "15" ou "máximo"
+}
+
 export interface WorkoutType {
   id: string;
   name: string;
   icon: string;
   color: string;
+  exercises?: Exercise[];
 }
 
 export interface Workout {

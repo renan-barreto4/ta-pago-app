@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2, Edit2, X } from 'lucide-react';
+import { Plus, Trash2, Edit2, X, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,7 +34,8 @@ export const WorkoutTypes = () => {
   const [formData, setFormData] = useState({
     name: '',
     icon: '💪',
-    color: 'hsl(142 76% 36%)'
+    color: 'hsl(142 76% 36%)',
+    exercises: [] as Array<{ id: string; name: string; sets: number; reps: string }>
   });
 
   const handleOpenModal = (type?: any) => {
@@ -43,14 +44,16 @@ export const WorkoutTypes = () => {
       setFormData({
         name: type.name,
         icon: type.icon,
-        color: type.color
+        color: type.color,
+        exercises: type.exercises || []
       });
     } else {
       setEditingType(null);
       setFormData({
         name: '',
         icon: '💪',
-        color: 'hsl(142 76% 36%)'
+        color: 'hsl(142 76% 36%)',
+        exercises: []
       });
     }
     setIsModalOpen(true);
@@ -62,7 +65,8 @@ export const WorkoutTypes = () => {
     setFormData({
       name: '',
       icon: '💪',
-      color: 'hsl(142 76% 36%)'
+      color: 'hsl(142 76% 36%)',
+      exercises: []
     });
   };
 
@@ -110,7 +114,7 @@ export const WorkoutTypes = () => {
     }
   };
 
-  const handleDelete = async (typeId: string) => {
+  const handleDeleteType = async (typeId: string) => {
     try {
       await removeWorkoutType(typeId);
       toast({
@@ -128,6 +132,35 @@ export const WorkoutTypes = () => {
         duration: 3000,
       });
     }
+  };
+
+  const addExercise = () => {
+    const newExercise = {
+      id: Date.now().toString(),
+      name: '',
+      sets: 3,
+      reps: '10-12'
+    };
+    setFormData(prev => ({
+      ...prev,
+      exercises: [...prev.exercises, newExercise]
+    }));
+  };
+
+  const removeExercise = (exerciseId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      exercises: prev.exercises.filter(ex => ex.id !== exerciseId)
+    }));
+  };
+
+  const updateExercise = (exerciseId: string, field: string, value: string | number) => {
+    setFormData(prev => ({
+      ...prev,
+      exercises: prev.exercises.map(ex => 
+        ex.id === exerciseId ? { ...ex, [field]: value } : ex
+      )
+    }));
   };
 
   const customTypes = workoutTypes.filter(type => !['1', '2', '4', '5', '6', '7'].includes(type.id));
@@ -222,6 +255,76 @@ export const WorkoutTypes = () => {
                   </div>
                 </div>
 
+                {/* Exercícios (Opcional) */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium text-foreground">Exercícios (Opcional)</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addExercise}
+                      className="h-8"
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      Adicionar
+                    </Button>
+                  </div>
+                  
+                  {formData.exercises.length > 0 && (
+                    <div className="space-y-3 max-h-40 overflow-y-auto">
+                      {formData.exercises.map((exercise, index) => (
+                        <div key={exercise.id} className="p-3 border rounded-md space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-muted-foreground">
+                              Exercício {index + 1}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeExercise(exercise.id)}
+                              className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                            >
+                              <Minus className="h-3 w-3" />
+                            </Button>
+                          </div>
+                          
+                          <Input
+                            placeholder="Nome do exercício"
+                            value={exercise.name}
+                            onChange={(e) => updateExercise(exercise.id, 'name', e.target.value)}
+                            className="text-sm"
+                          />
+                          
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Séries</Label>
+                              <Input
+                                type="number"
+                                min="1"
+                                max="10"
+                                value={exercise.sets}
+                                onChange={(e) => updateExercise(exercise.id, 'sets', parseInt(e.target.value) || 1)}
+                                className="text-sm"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Repetições</Label>
+                              <Input
+                                placeholder="Ex: 10-12, 15, máximo"
+                                value={exercise.reps}
+                                onChange={(e) => updateExercise(exercise.id, 'reps', e.target.value)}
+                                className="text-sm"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex gap-2 pt-4">
                   <Button type="button" variant="outline" onClick={handleCloseModal} className="flex-1">
                     Cancelar
@@ -279,7 +382,7 @@ export const WorkoutTypes = () => {
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancelar</AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => handleDelete(type.id)}
+                              onClick={() => handleDeleteType(type.id)}
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             >
                               Excluir
