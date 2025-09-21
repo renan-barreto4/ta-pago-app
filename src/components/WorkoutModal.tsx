@@ -27,7 +27,6 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
   const [notes, setNotes] = useState('');
   const [workoutDate, setWorkoutDate] = useState<Date>(selectedDate || new Date());
   const [isLoading, setIsLoading] = useState(false);
-  const [showToast, setShowToast] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   
   const { workoutTypes, saveWorkout, updateWorkout, deleteWorkout } = useFitLog();
@@ -90,7 +89,11 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
         await updateWorkout(existingWorkout.id, workoutData);
       } else {
         await saveWorkout(workoutData);
-        setShowToast(true);
+        toast({
+          title: "Treino registrado!",
+          description: "Parabéns por manter a consistência",
+          className: "border-green-500 bg-green-50 text-green-900",
+        });
       }
 
       onClose();
@@ -268,15 +271,6 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
       </Card>
       </div>
 
-      {/* Toast customizado */}
-      {showToast && (
-        <ProgressToast
-          title="Treino registrado!"
-          description="Parabéns por manter a consistência"
-          duration={3000}
-          onClose={() => setShowToast(false)}
-        />
-      )}
     </>
   );
 };
