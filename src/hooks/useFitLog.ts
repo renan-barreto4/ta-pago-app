@@ -404,16 +404,84 @@ export const useFitLog = () => {
     return distribution;
   }, [getWorkoutsByPeriod]);
 
+  // Adicionar tipo de treino
+  const addWorkoutType = useCallback(async (typeData: Omit<WorkoutType, 'id'>) => {
+    setIsLoading(true);
+    
+    try {
+      // Simular delay da API
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      const newType: WorkoutType = {
+        ...typeData,
+        id: Date.now().toString(),
+      };
+
+      setWorkoutTypes(prev => [...prev, newType]);
+      setIsLoading(false);
+      return newType;
+    } catch (error) {
+      setIsLoading(false);
+      throw error;
+    }
+  }, []);
+
+  // Atualizar tipo de treino
+  const updateWorkoutType = useCallback(async (id: string, typeData: Partial<Omit<WorkoutType, 'id'>>) => {
+    setIsLoading(true);
+    
+    try {
+      // Simular delay da API
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      setWorkoutTypes(prev => prev.map(type => 
+        type.id === id 
+          ? { ...type, ...typeData }
+          : type
+      ));
+      setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+      throw error;
+    }
+  }, []);
+
+  // Remover tipo de treino
+  const removeWorkoutType = useCallback(async (id: string) => {
+    setIsLoading(true);
+    
+    try {
+      // Simular delay da API
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Não permitir remover tipos padrão
+      if (['1', '2', '3', '4', '5', '6', '7', '8', 'custom'].includes(id)) {
+        throw new Error('Não é possível remover tipos de treino padrão');
+      }
+      
+      setWorkoutTypes(prev => prev.filter(type => type.id !== id));
+      setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+      throw error;
+    }
+  }, []);
+
   return {
     // Estado
     workouts,
     workoutTypes,
     isLoading,
     
-    // Ações CRUD
+    // Ações CRUD para treinos
     saveWorkout,
     updateWorkout,
     deleteWorkout,
+    
+    // Ações CRUD para tipos de treino
+    addWorkoutType,
+    updateWorkoutType,
+    removeWorkoutType,
     
     // Consultas
     getWorkoutByDate,

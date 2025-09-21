@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { Calendar, TrendingUp, History, Plus } from 'lucide-react';
+import { Calendar, TrendingUp, History, Plus, Dumbbell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { WorkoutCalendar } from '@/components/WorkoutCalendar';
 import { WorkoutModal } from '@/components/WorkoutModal';
 import { StatsCards } from '@/components/StatsCards';
 import { WorkoutHistory } from '@/components/WorkoutHistory';
+import { WorkoutTypes } from '@/components/WorkoutTypes';
 import { useFitLog } from '@/hooks/useFitLog';
 import { cn } from '@/lib/utils';
 
-type ActiveTab = 'calendar' | 'stats' | 'history';
+type ActiveTab = 'calendar' | 'stats' | 'history' | 'types';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('calendar');
@@ -41,6 +42,7 @@ const Index = () => {
     { key: 'calendar' as const, label: 'Calendário', icon: Calendar },
     { key: 'stats' as const, label: 'Estatísticas', icon: TrendingUp },
     { key: 'history' as const, label: 'Histórico', icon: History },
+    { key: 'types' as const, label: 'Treinos', icon: Dumbbell },
   ];
 
   return (
@@ -85,6 +87,8 @@ const Index = () => {
         {activeTab === 'history' && (
           <WorkoutHistory onEditWorkout={handleEditWorkout} />
         )}
+
+        {activeTab === 'types' && <WorkoutTypes />}
       </main>
 
       {/* Bottom Navigation */}
