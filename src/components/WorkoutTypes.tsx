@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2, Edit2 } from 'lucide-react';
+import { Plus, Trash2, Edit2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -125,64 +125,82 @@ export const WorkoutTypes = () => {
         <p className="text-muted-foreground">Gerencie os tipos de treino disponíveis</p>
       </div>
       
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogTrigger asChild>
           <Button onClick={() => handleOpenModal()} className="bg-gradient-primary shadow-workout">
             <Plus className="h-4 w-4 mr-2" />
             Adicione um Novo Treino
           </Button>
         </DialogTrigger>
-        
-        <DialogContent className="sm:max-w-md mx-4 max-w-[calc(100vw-2rem)]">
-          <DialogHeader>
-            <DialogTitle>
-              {editingType ? 'Editar Tipo de Treino' : 'Novo Tipo de Treino'}
-            </DialogTitle>
-            </DialogHeader>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome do Treino</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Ex: CrossFit, Boxe, etc."
-                  className="w-full"
-                />
-              </div>
+      </Dialog>
 
-              <div className="space-y-2">
-                <Label>Emoji</Label>
-                <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
-                  {EMOJI_OPTIONS.map((emoji) => (
-                    <button
-                      key={emoji}
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, icon: emoji }))}
-                      className={`p-3 text-lg rounded-md border transition-all hover:scale-105 ${
-                        formData.icon === emoji
-                          ? 'border-primary bg-primary/10 scale-105'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
+      {/* Modal customizado seguindo o padrão do WorkoutModal */}
+      {isModalOpen && (
+        <>
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* Overlay */}
+            <div 
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={handleCloseModal}
+            />
+          
+            {/* Modal */}
+            <Card className="relative z-10 w-full max-w-md mx-4 p-6 bg-card shadow-modal animate-scale-in">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-foreground">
+                  {editingType ? 'Editar Tipo de Treino' : 'Novo Tipo de Treino'}
+                </h3>
+                <Button variant="outline" size="sm" onClick={handleCloseModal} className="h-8 w-8 p-0">
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-sm font-medium text-foreground">Nome do Treino</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Ex: CrossFit, Boxe, etc."
+                    className="w-full"
+                  />
                 </div>
-              </div>
 
-              <div className="flex gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={handleCloseModal} className="flex-1">
-                  Cancelar
-                </Button>
-                <Button type="submit" className="flex-1 bg-gradient-primary">
-                  {editingType ? 'Atualizar' : 'Criar'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-foreground">Emoji</Label>
+                  <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
+                    {EMOJI_OPTIONS.map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, icon: emoji }))}
+                        className={`p-3 text-lg rounded-md border transition-all hover:scale-105 ${
+                          formData.icon === emoji
+                            ? 'border-primary bg-primary/10 scale-105'
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <Button type="button" variant="outline" onClick={handleCloseModal} className="flex-1">
+                    Cancelar
+                  </Button>
+                  <Button type="submit" className="flex-1 bg-gradient-primary">
+                    {editingType ? 'Atualizar' : 'Criar'}
+                  </Button>
+                </div>
+              </form>
+            </Card>
+          </div>
+        </>
+      )}
 
       {/* Tipos Personalizados */}
       {customTypes.length > 0 && (
