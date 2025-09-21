@@ -11,6 +11,21 @@ import { useToast } from '@/hooks/use-toast';
 
 const EMOJI_OPTIONS = ['🅰️', '🅱️', 'Ⓒ', 'Ⓓ', 'Ⓔ', 'Ⓕ', '🦵', '🔄', '🤷', '💪', '🏃', '🧘', '🏊', '🚴', '🏋️', '🤸', '⚡', '🥊', '⛷️', '🏀', '⚽', '🎾', '🏐', '🏓', '🥋', '🤾', '🏆', '🔥', '💯'];
 
+const COLOR_OPTIONS = [
+  'hsl(142 76% 36%)', // Verde
+  'hsl(217 91% 60%)', // Azul
+  'hsl(266 76% 46%)', // Roxo
+  'hsl(195 92% 50%)', // Azul claro
+  'hsl(25 95% 53%)', // Laranja
+  'hsl(120 76% 36%)', // Verde escuro
+  'hsl(0 84% 60%)', // Vermelho
+  'hsl(300 76% 46%)', // Magenta
+  'hsl(45 93% 47%)', // Amarelo
+  'hsl(330 81% 60%)', // Rosa
+  'hsl(20 90% 48%)', // Laranja escuro
+  'hsl(160 84% 39%)', // Verde água
+];
+
 export const WorkoutTypes = () => {
   const { workoutTypes, addWorkoutType, removeWorkoutType, updateWorkoutType } = useFitLog();
   const { toast } = useToast();
@@ -115,8 +130,8 @@ export const WorkoutTypes = () => {
     }
   };
 
-  const customTypes = workoutTypes.filter(type => type.id !== 'custom' && !['1', '2', '3', '4', '5', '6', '7', '8'].includes(type.id));
-  const defaultTypes = workoutTypes.filter(type => type.id === 'custom' || ['1', '2', '3', '4', '5', '6', '7', '8'].includes(type.id));
+  const customTypes = workoutTypes.filter(type => !['1', '2', '4', '5', '6', '7'].includes(type.id));
+  const defaultTypes = workoutTypes.filter(type => ['1', '2', '4', '5', '6', '7'].includes(type.id));
 
   return (
     <div className="space-y-6">
@@ -184,6 +199,25 @@ export const WorkoutTypes = () => {
                       >
                         {emoji}
                       </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-foreground">Cor</Label>
+                  <div className="grid grid-cols-6 gap-2">
+                    {COLOR_OPTIONS.map((color) => (
+                      <button
+                        key={color}
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, color }))}
+                        className={`w-8 h-8 rounded-full border-2 transition-all hover:scale-110 ${
+                          formData.color === color
+                            ? 'border-foreground scale-110'
+                            : 'border-border'
+                        }`}
+                        style={{ backgroundColor: color }}
+                      />
                     ))}
                   </div>
                 </div>
