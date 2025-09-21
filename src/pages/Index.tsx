@@ -54,8 +54,7 @@ const Index = () => {
                 <span className="text-white font-bold text-lg">💪</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-foreground">FitLog</h1>
-                <p className="text-sm text-muted-foreground">Tá Pago</p>
+                <h1 className="text-xl font-bold text-foreground">Tá Pago</h1>
               </div>
             </div>
             
