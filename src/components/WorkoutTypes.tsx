@@ -144,7 +144,7 @@ export const WorkoutTypes = () => {
         <DialogTrigger asChild>
           <Button onClick={() => handleOpenModal()} className="bg-gradient-primary shadow-workout">
             <Plus className="h-4 w-4 mr-2" />
-            Adicione um Novo Treino
+            Novo Tipo de Treino
           </Button>
         </DialogTrigger>
       </Dialog>
