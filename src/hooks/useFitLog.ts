@@ -40,13 +40,13 @@ export interface WorkoutStats {
 const DEFAULT_WORKOUT_TYPES: WorkoutType[] = [
   { id: '1', name: 'Treino A', icon: '🅰️', color: 'hsl(142 76% 36%)' },
   { id: '2', name: 'Treino B', icon: '🅱️', color: 'hsl(217 91% 60%)' },
-  { id: '4', name: 'Treino C', icon: 'Ⓒ', color: 'hsl(195 92% 50%)' },
-  { id: '5', name: 'Treino D', icon: 'Ⓓ', color: 'hsl(25 95% 53%)' },
-  { id: '6', name: 'Treino E', icon: 'Ⓔ', color: 'hsl(120 76% 36%)' },
-  { id: '7', name: 'Treino F', icon: 'Ⓕ', color: 'hsl(0 84% 60%)' },
-  { id: '8', name: 'Treino G', icon: '💪', color: 'hsl(300 76% 46%)' },
-  { id: '9', name: 'Treino H', icon: '🏋️', color: 'hsl(45 93% 47%)' },
-  { id: '10', name: 'Treino I', icon: '⚡', color: 'hsl(330 81% 60%)' },
+  { id: '4', name: 'Treino C', icon: '🔥', color: 'hsl(195 92% 50%)' },
+  { id: '5', name: 'Treino D', icon: '💪', color: 'hsl(25 95% 53%)' },
+  { id: '6', name: 'Treino E', icon: '⚡', color: 'hsl(120 76% 36%)' },
+  { id: '7', name: 'Treino F', icon: '🏋️', color: 'hsl(0 84% 60%)' },
+  { id: '8', name: 'Treino G', icon: '🚀', color: 'hsl(300 76% 46%)' },
+  { id: '9', name: 'Treino H', icon: '🎯', color: 'hsl(45 93% 47%)' },
+  { id: '10', name: 'Treino I', icon: '💯', color: 'hsl(330 81% 60%)' },
 ];
 
 // Mock de dados iniciais para demonstração (usando datas do mês atual)
