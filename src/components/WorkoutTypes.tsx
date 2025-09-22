@@ -169,9 +169,18 @@ export const WorkoutTypes = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-foreground">Fichas de Treino</h2>
-        <p className="text-muted-foreground">Gerencie suas fichas de treino disponíveis</p>
+        <h2 className="text-2xl font-bold text-foreground">Tipos de Treino</h2>
+        <p className="text-muted-foreground">Gerencie os tipos de treino disponíveis</p>
       </div>
+      
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogTrigger asChild>
+          <Button onClick={() => handleOpenModal()} className="bg-gradient-primary shadow-workout">
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Tipo de Treino
+          </Button>
+        </DialogTrigger>
+      </Dialog>
 
       {/* Modal customizado seguindo o padrão do WorkoutModal */}
       {isModalOpen && (
@@ -398,7 +407,7 @@ export const WorkoutTypes = () => {
 
       {/* Tipos Padrão */}
       <div>
-        <h3 className="text-lg font-semibold text-foreground mb-4">Fichas Padrão</h3>
+        <h3 className="text-lg font-semibold text-foreground mb-4">Tipos Padrão</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {defaultTypes.map((type) => (
             <Card key={type.id} className="shadow-workout">
