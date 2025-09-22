@@ -4,7 +4,7 @@ import { ptBR } from 'date-fns/locale';
 import { Plus, Scale, ChevronDown, Calendar as CalendarIcon } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { X } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -54,22 +54,15 @@ const WeightTracker = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <Card className="p-6 bg-gradient-card shadow-card">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center shadow-workout">
-              <Scale className="h-5 w-5 text-white" />
-            </div>
-            <h2 className="text-2xl font-bold text-foreground">Controle de Peso</h2>
-          </div>
-        </div>
-
-        {/* Period Filter */}
-        <div className="flex justify-center">
+      <Card className="p-4 bg-gradient-card shadow-card">
+        <div className="flex flex-col gap-4">
+          <h3 className="text-lg font-semibold text-foreground">Controle de Peso</h3>
+        
+          {/* Period Filter */}
+          <div className="flex justify-center">
           <Select value={selectedPeriod} onValueChange={(value: '7d' | '30d' | '90d' | '1y' | 'all') => setSelectedPeriod(value)}>
             <SelectTrigger className="w-32">
               <SelectValue />
-              <ChevronDown className="h-4 w-4" />
             </SelectTrigger>
             <SelectContent>
               {periods.map(({ key, label }) => (
@@ -79,17 +72,18 @@ const WeightTracker = () => {
               ))}
             </SelectContent>
           </Select>
+          </div>
         </div>
       </Card>
 
       {/* Chart */}
-      <Card className="p-8 bg-gradient-card shadow-card">
+      <Card className="p-4 bg-gradient-card shadow-card">
         <div className="h-96 mb-6 relative">
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart 
                 data={chartData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                margin={{ top: 20, right: 10, left: 10, bottom: 20 }}
               >
                 <CartesianGrid 
                   strokeDasharray="3 3" 
@@ -168,7 +162,7 @@ const WeightTracker = () => {
       </Card>
 
       {/* Weight History Table */}
-      {filteredData.length > 0 && (
+      {weightEntries.length > 0 && (
         <Card className="p-6 bg-gradient-card shadow-card">
           <h3 className="text-lg font-semibold text-foreground mb-4">Histórico de Peso</h3>
           <div className="rounded-md border">
@@ -181,8 +175,8 @@ const WeightTracker = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredData.map((entry, index) => {
-                  const previousEntry = filteredData[index + 1];
+                {weightEntries.map((entry, index) => {
+                  const previousEntry = weightEntries[index + 1];
                   const difference = previousEntry ? entry.weight - previousEntry.weight : 0;
                   
                   return (
@@ -213,13 +207,27 @@ const WeightTracker = () => {
       )}
 
       {/* Add Weight Modal */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-3xl border-0 bg-background/95 backdrop-blur-xl shadow-2xl">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-3xl" />
-          <DialogHeader className="relative">
-            <DialogTitle className="text-center text-xl font-bold">Adicionar Peso</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-6 py-4 relative">
+      {isModalOpen && (
+        <>
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* Overlay */}
+            <div 
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setIsModalOpen(false)}
+            />
+          
+            {/* Modal */}
+            <Card className="relative z-10 w-full max-w-md mx-4 p-6 bg-card shadow-modal animate-scale-in">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Adicionar Peso
+                </h3>
+                <Button variant="outline" size="sm" onClick={() => setIsModalOpen(false)} className="h-8 w-8 p-0">
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+          <div className="space-y-6">
             {/* Date Selection */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Data</label>
@@ -300,8 +308,10 @@ const WeightTracker = () => {
               </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+            </Card>
+          </div>
+        </>
+      )}
 
     </div>
   );
