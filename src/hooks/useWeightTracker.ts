@@ -7,27 +7,8 @@ export interface WeightEntry {
   createdAt: Date;
 }
 
-// Mock data for demonstration
-const MOCK_WEIGHT_ENTRIES: WeightEntry[] = [
-  {
-    id: '1',
-    weight: 72.5,
-    date: new Date(2024, 8, 15), // 15 Sep 2024
-    createdAt: new Date(),
-  },
-  {
-    id: '2',
-    weight: 71.8,
-    date: new Date(2024, 8, 20), // 20 Sep 2024
-    createdAt: new Date(),
-  },
-  {
-    id: '3',
-    weight: 71.2,
-    date: new Date(2024, 8, 25), // 25 Sep 2024
-    createdAt: new Date(),
-  },
-];
+// Mock data for demonstration (empty by default)
+const MOCK_WEIGHT_ENTRIES: WeightEntry[] = [];
 
 export const useWeightTracker = () => {
   const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([]);

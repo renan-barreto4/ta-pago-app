@@ -128,7 +128,8 @@ export const WorkoutCalendar = ({ onDateSelect, selectedDate }: WorkoutCalendarP
                   "text-foreground": isCurrentMonth,
                   
                   // Status do dia
-                  "bg-workout-completed text-white shadow-workout": dayStatus.color === 'workout-completed',
+                  "bg-workout-completed text-white shadow-workout": dayStatus.color === 'workout-completed' && !isToday(day),
+                  "bg-workout-completed text-white shadow-workout border-2 border-blue-500": dayStatus.color === 'workout-completed' && isToday(day),
                   "border-2 border-blue-500 bg-background text-foreground": dayStatus.color === 'workout-today',
                   "bg-destructive text-white": dayStatus.color === 'workout-missed',
                   "bg-background hover:bg-accent": dayStatus.color === 'default',
