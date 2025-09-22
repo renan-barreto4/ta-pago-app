@@ -60,13 +60,6 @@ const Index = () => {
               </div>
             </div>
             
-            <Button
-              onClick={() => handleDateSelect(new Date())}
-              className="bg-gradient-primary shadow-workout"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Registrar Treino
-            </Button>
           </div>
         </div>
       </header>
