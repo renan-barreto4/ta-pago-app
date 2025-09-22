@@ -57,66 +57,65 @@ const currentMonth = now.getMonth();
 const MOCK_WORKOUTS: Workout[] = [
   {
     id: '1',
-    date: new Date(currentYear, currentMonth, 20), // Dia 20 do mês atual
+    date: new Date(currentYear, currentMonth, 20),
     typeId: '1',
-    notes: 'Treino de peito e tríceps',
+    notes: 'Treino A - Peito e tríceps',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: '2',
-    date: new Date(currentYear, currentMonth, 18), // Dia 18 do mês atual
+    date: new Date(currentYear, currentMonth, 18),
     typeId: '2',
-    notes: '30 minutos na esteira',
+    notes: 'Treino B - Costas e bíceps',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: '3',
-    date: new Date(currentYear, currentMonth, 17), // Dia 17 do mês atual
+    date: new Date(currentYear, currentMonth, 17),
     typeId: '4',
-    notes: 'Natação',
+    notes: 'Treino C - Intenso',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: '4',
-    date: new Date(currentYear, currentMonth, 19), // Dia 19 do mês atual
-    typeId: '7',
-    notes: 'Treino funcional',
+    date: new Date(currentYear, currentMonth, 19),
+    typeId: '5',
+    notes: 'Treino D - Força',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: '5',
-    date: new Date(currentYear, currentMonth, 15), // Dia 15 do mês atual
-    typeId: '3',
-    notes: 'Aula de yoga matinal',
+    date: new Date(currentYear, currentMonth, 15),
+    typeId: '6',
+    notes: 'Treino E - Explosivo',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: '6',
-    date: new Date(currentYear, currentMonth, 12), // Dia 12 do mês atual
-    typeId: '1',
-    notes: 'Treino de costas e bíceps',
+    date: new Date(currentYear, currentMonth, 12),
+    typeId: '7',
+    notes: 'Treino F - Funcional',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: '7',
-    date: new Date(currentYear, currentMonth, 11), // Dia 11 do mês atual
-    typeId: '5',
-    notes: 'Corrida no parque',
+    date: new Date(currentYear, currentMonth, 11),
+    typeId: '8',
+    notes: 'Treino G - Rápido',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: '8',
-    date: new Date(currentYear, currentMonth, 10), // Dia 10 do mês atual
-    typeId: 'custom',
-    customType: 'Dança',
-    notes: 'Aula de salsa',
+    date: new Date(currentYear, currentMonth, 10),
+    typeId: '9',
+    notes: 'Treino H - Foco',
     createdAt: new Date(),
     updatedAt: new Date(),
   },

@@ -1,15 +1,14 @@
 import { useState } from 'react';
-import { Calendar, TrendingUp, History, Plus, Dumbbell } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Calendar, TrendingUp, Scale, Dumbbell } from 'lucide-react';
 import { WorkoutCalendar } from '@/components/WorkoutCalendar';
 import { WorkoutModal } from '@/components/WorkoutModal';
 import { StatsCards } from '@/components/StatsCards';
-import { WorkoutHistory } from '@/components/WorkoutHistory';
 import { WorkoutTypes } from '@/components/WorkoutTypes';
+import WeightTracker from '@/components/WeightTracker';
 import { useFitLog } from '@/hooks/useFitLog';
 import { cn } from '@/lib/utils';
 
-type ActiveTab = 'calendar' | 'stats' | 'history' | 'types';
+type ActiveTab = 'calendar' | 'stats' | 'weight' | 'types';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('calendar');
@@ -42,7 +41,7 @@ const Index = () => {
     { key: 'calendar' as const, label: 'Calendário', icon: Calendar },
     { key: 'stats' as const, label: 'Estatísticas', icon: TrendingUp },
     { key: 'types' as const, label: 'Treinos', icon: Dumbbell },
-    { key: 'history' as const, label: 'Histórico', icon: History },
+    { key: 'weight' as const, label: 'Peso', icon: Scale },
   ];
 
   return (
@@ -77,11 +76,9 @@ const Index = () => {
 
         {activeTab === 'stats' && <StatsCards />}
 
-        {activeTab === 'history' && (
-          <WorkoutHistory onEditWorkout={handleEditWorkout} />
-        )}
-
         {activeTab === 'types' && <WorkoutTypes />}
+
+        {activeTab === 'weight' && <WeightTracker />}
       </main>
 
       {/* Bottom Navigation */}
