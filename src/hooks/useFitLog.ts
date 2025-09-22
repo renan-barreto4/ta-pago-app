@@ -38,12 +38,10 @@ export interface WorkoutStats {
 
 // Tipos de treino predefinidos
 const DEFAULT_WORKOUT_TYPES: WorkoutType[] = [
-  { id: '1', name: 'Musculação', icon: '💪', color: 'hsl(142 76% 36%)' },
-  { id: '2', name: 'Cardio', icon: '🏃', color: 'hsl(217 91% 60%)' },
-  { id: '4', name: 'Natação', icon: '🏊', color: 'hsl(195 92% 50%)' },
-  { id: '5', name: 'Corrida', icon: '🏃‍♂️', color: 'hsl(25 95% 53%)' },
-  { id: '6', name: 'Ciclismo', icon: '🚴', color: 'hsl(120 76% 36%)' },
-  { id: '7', name: 'Funcional', icon: '🏋️', color: 'hsl(0 84% 60%)' },
+  { id: '1', name: 'Ficha A', icon: '🅰️', color: 'hsl(142 76% 36%)' },
+  { id: '2', name: 'Ficha A', icon: '🅰️', color: 'hsl(217 91% 60%)' },
+  { id: '4', name: 'Ficha A', icon: '🅰️', color: 'hsl(195 92% 50%)' },
+  { id: '5', name: 'Ficha A', icon: '🅰️', color: 'hsl(25 95% 53%)' },
 ];
 
 // Mock de dados iniciais para demonstração (usando datas do mês atual)

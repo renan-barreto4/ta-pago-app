@@ -41,7 +41,7 @@ const Index = () => {
   const tabs = [
     { key: 'calendar' as const, label: 'Calendário', icon: Calendar },
     { key: 'stats' as const, label: 'Estatísticas', icon: TrendingUp },
-    { key: 'types' as const, label: 'Treinos', icon: Dumbbell },
+    { key: 'types' as const, label: 'Fichas', icon: Dumbbell },
     { key: 'history' as const, label: 'Histórico', icon: History },
   ];
 
@@ -59,14 +59,6 @@ const Index = () => {
                 <h1 className="text-xl font-bold text-foreground">Tá Pago</h1>
               </div>
             </div>
-            
-            <Button
-              onClick={() => handleDateSelect(new Date())}
-              className="bg-gradient-primary shadow-workout"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Registrar Treino
-            </Button>
           </div>
         </div>
       </header>

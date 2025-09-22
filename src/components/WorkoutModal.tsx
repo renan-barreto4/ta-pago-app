@@ -35,9 +35,9 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
   // Resetar formulário quando modal abre/fecha
   useEffect(() => {
     if (isOpen) {
-      // Sempre definir a data como hoje quando não há treino existente
+      // Usar a data selecionada quando não há treino existente
       if (!existingWorkout) {
-        setWorkoutDate(new Date());
+        setWorkoutDate(selectedDate);
       } else {
         setWorkoutDate(existingWorkout.date);
       }
