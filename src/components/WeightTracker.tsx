@@ -14,11 +14,11 @@ import { useWeightTracker } from '@/hooks/useWeightTracker';
 import { cn } from '@/lib/utils';
 
 const WeightTracker = () => {
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d' | '1y' | 'all'>('30d');
   const [currentWeight, setCurrentWeight] = useState(70);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  
   const { weightEntries, addWeightEntry, updateWeightEntry, getFilteredEntries } = useWeightTracker();
   
   const filteredData = getFilteredEntries(selectedPeriod);
@@ -45,11 +45,13 @@ const WeightTracker = () => {
     { key: 'all' as const, label: 'Todos' },
   ];
 
-  const chartData = filteredData.map(entry => ({
-    date: format(entry.date, 'dd/MM'),
-    weight: entry.weight,
-    fullDate: format(entry.date, 'dd/MM/yyyy')
-  }));
+  const chartData = filteredData
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .map(entry => ({
+      date: format(entry.date, 'dd/MM'),
+      weight: entry.weight,
+      fullDate: format(entry.date, 'dd/MM/yyyy')
+    }));
 
   return (
     <div className="space-y-6">
@@ -231,7 +233,7 @@ const WeightTracker = () => {
             {/* Date Selection */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Data</label>
-              <Popover>
+              <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -248,7 +250,12 @@ const WeightTracker = () => {
                   <Calendar
                     mode="single"
                     selected={selectedDate}
-                    onSelect={(date) => date && setSelectedDate(date)}
+                    onSelect={(date) => {
+                      if (date) {
+                        setSelectedDate(date);
+                        setShowDatePicker(false);
+                      }
+                    }}
                     initialFocus
                     className="pointer-events-auto"
                   />

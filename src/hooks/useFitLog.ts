@@ -57,6 +57,14 @@ const currentMonth = now.getMonth();
 const MOCK_WORKOUTS: Workout[] = [
   {
     id: '1',
+    date: new Date(2025, 8, 22), // 22/09/2025
+    typeId: '1',
+    notes: 'Treino A completo',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: '2',
     date: new Date(currentYear, currentMonth, 20),
     typeId: '1',
     notes: 'Treino A - Peito e tríceps',
@@ -64,7 +72,7 @@ const MOCK_WORKOUTS: Workout[] = [
     updatedAt: new Date(),
   },
   {
-    id: '2',
+    id: '3',
     date: new Date(currentYear, currentMonth, 18),
     typeId: '2',
     notes: 'Treino B - Costas e bíceps',
