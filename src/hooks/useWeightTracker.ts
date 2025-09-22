@@ -43,17 +43,27 @@ export const useWeightTracker = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const addWeightEntry = (weight: number) => {
+  const addWeightEntry = (weight: number, date: Date = new Date()) => {
     const newEntry: WeightEntry = {
       id: Date.now().toString(),
       weight,
-      date: new Date(),
+      date,
       createdAt: new Date(),
     };
 
     setWeightEntries(prev => [newEntry, ...prev].sort((a, b) => 
       new Date(b.date).getTime() - new Date(a.date).getTime()
     ));
+  };
+
+  const updateWeightEntry = (id: string, weight: number, date: Date) => {
+    setWeightEntries(prev => 
+      prev.map(entry => 
+        entry.id === id 
+          ? { ...entry, weight, date }
+          : entry
+      ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    );
   };
 
   const deleteWeightEntry = (id: string) => {
@@ -96,6 +106,7 @@ export const useWeightTracker = () => {
     weightEntries,
     isLoading,
     addWeightEntry,
+    updateWeightEntry,
     deleteWeightEntry,
     getFilteredEntries,
     getLatestWeight,
