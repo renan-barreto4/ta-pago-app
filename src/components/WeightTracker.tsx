@@ -4,6 +4,7 @@ import { ptBR } from 'date-fns/locale';
 import { Plus, Scale, ChevronDown, Calendar as CalendarIcon } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { X } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -263,34 +264,33 @@ const WeightTracker = () => {
               </Popover>
             </div>
 
-            {/* Weight Display */}
+            {/* Weight Input */}
             <div className="text-center">
               <div className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-2">
                 {currentWeight} kg
               </div>
               <p className="text-sm text-muted-foreground">
-                Arraste a régua para ajustar
+                Digite o peso atual
               </p>
             </div>
 
-            {/* Weight Slider */}
+            {/* Weight Input Field */}
             <div className="space-y-4">
-              <div className="relative">
-                <input
-                  type="range"
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">Peso (kg)</label>
+                <Input
+                  type="number"
                   min="30"
                   max="200"
                   step="0.1"
                   value={currentWeight}
-                  onChange={(e) => setCurrentWeight(parseFloat(e.target.value))}
-                  className="w-full h-3 bg-muted rounded-lg appearance-none cursor-pointer slider"
-                  style={{
-                    background: `linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) ${((currentWeight - 30) / (200 - 30)) * 100}%, hsl(var(--muted)) ${((currentWeight - 30) / (200 - 30)) * 100}%, hsl(var(--muted)) 100%)`
-                  }}
+                  onChange={(e) => setCurrentWeight(parseFloat(e.target.value) || 0)}
+                  placeholder="Ex: 70.5"
+                  className="text-center text-lg font-medium"
                 />
-                <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                  <span>30 kg</span>
-                  <span>200 kg</span>
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Mínimo: 30 kg</span>
+                  <span>Máximo: 200 kg</span>
                 </div>
               </div>
             </div>
