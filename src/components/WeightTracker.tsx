@@ -178,8 +178,10 @@ const WeightTracker = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {weightEntries.map((entry, index) => {
-                  const previousEntry = weightEntries[index + 1];
+                {weightEntries
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                  .map((entry, index, sortedEntries) => {
+                  const previousEntry = sortedEntries[index + 1];
                   const difference = previousEntry ? entry.weight - previousEntry.weight : 0;
                   
                   return (
