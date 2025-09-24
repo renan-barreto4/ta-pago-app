@@ -1,103 +1,117 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { Calendar, TrendingUp, Scale, Dumbbell } from 'lucide-react';
+import { WorkoutCalendar } from '@/components/WorkoutCalendar';
+import { WorkoutModal } from '@/components/WorkoutModal';
+import { StatsCards } from '@/components/StatsCards';
+import { WorkoutTypes } from '@/components/WorkoutTypes';
+import WeightTracker from '@/components/WeightTracker';
+import { useFitLog } from '@/hooks/useFitLog';
+import { cn } from '@/lib/utils';
+
+type ActiveTab = 'calendar' | 'stats' | 'weight' | 'types';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [activeTab, setActiveTab] = useState<ActiveTab>('calendar');
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingWorkout, setEditingWorkout] = useState<any>(null);
+  
+  const { getWorkoutByDate } = useFitLog();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+    const existingWorkout = getWorkoutByDate(date);
+    setEditingWorkout(existingWorkout || null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditWorkout = (workout: any) => {
+    setSelectedDate(workout.date);
+    setEditingWorkout(workout);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedDate(null);
+    setEditingWorkout(null);
+  };
+
+  const tabs = [
+    { key: 'calendar' as const, label: 'Calendário', icon: Calendar },
+    { key: 'stats' as const, label: 'Estatísticas', icon: TrendingUp },
+    { key: 'types' as const, label: 'Treinos', icon: Dumbbell },
+    { key: 'weight' as const, label: 'Peso', icon: Scale },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-background">
+      {/* Header */}
+      <header className="bg-card border-b border-border shadow-sm sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center shadow-workout">
+                <span className="text-white font-bold text-lg">💪</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-foreground">Tá Pago</h1>
+              </div>
+            </div>
+            
+          </div>
         </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-6xl mx-auto px-4 py-6 pb-20">
+        {activeTab === 'calendar' && (
+          <div className="space-y-6">
+            <WorkoutCalendar 
+              onDateSelect={handleDateSelect}
+              selectedDate={selectedDate}
+            />
+          </div>
+        )}
+
+        {activeTab === 'stats' && <StatsCards />}
+
+        {activeTab === 'types' && <WorkoutTypes />}
+
+        {activeTab === 'weight' && <WeightTracker />}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 safe-area-inset-bottom">
+        <div className="flex">
+          {tabs.map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={cn(
+                "flex-1 flex flex-col items-center gap-1 px-2 py-3 text-xs font-medium transition-all duration-200",
+                "min-h-[60px] justify-center",
+                activeTab === key
+                  ? "text-primary bg-primary/10"
+                  : "text-muted-foreground hover:text-primary hover:bg-primary/5"
+              )}
+            >
+              <Icon className="h-5 w-5" />
+              <span className="leading-tight">{label}</span>
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      {/* Modal */}
+      <WorkoutModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        selectedDate={selectedDate || new Date()}
+        existingWorkout={editingWorkout}
+      />
     </div>
   );
 }
