@@ -14,7 +14,7 @@ type ActiveTab = 'calendar' | 'stats' | 'weight' | 'types';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('calendar');
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingWorkout, setEditingWorkout] = useState<any>(null);
   
@@ -35,7 +35,7 @@ export default function Home() {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedDate(undefined);
+    setSelectedDate(null);
     setEditingWorkout(null);
   };
 
@@ -71,7 +71,7 @@ export default function Home() {
           <div className="space-y-6">
             <WorkoutCalendar 
               onDateSelect={handleDateSelect}
-              selectedDate={selectedDate}
+              selectedDate={selectedDate || undefined}
             />
           </div>
         )}

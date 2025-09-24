@@ -14,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className="min-h-screen bg-gradient-background">
+      <body>
         <Providers>{children}</Providers>
       </body>
     </html>
