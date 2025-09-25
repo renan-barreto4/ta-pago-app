@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isBefore, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
@@ -14,7 +14,12 @@ interface WorkoutCalendarProps {
 
 export const WorkoutCalendar = ({ onDateSelect, selectedDate }: WorkoutCalendarProps) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [isClient, setIsClient] = useState(false);
   const { getWorkoutByDate, workoutTypes } = useFitLog();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -30,8 +35,8 @@ export const WorkoutCalendar = ({ onDateSelect, selectedDate }: WorkoutCalendarP
 
   const getDayStatus = (date: Date) => {
     const workout = getWorkoutByDate(date);
-    const today = isToday(date);
-    const isPast = isBefore(date, startOfDay(new Date())) && !today;
+    const today = isClient ? isToday(date) : false;
+    const isPast = isClient ? isBefore(date, startOfDay(new Date())) && !today : false;
     
     if (workout) {
       const type = workoutTypes.find(t => t.id === workout.typeId);
@@ -129,7 +134,7 @@ export const WorkoutCalendar = ({ onDateSelect, selectedDate }: WorkoutCalendarP
                   
                   // Status do dia
                   "bg-workout-completed text-white shadow-workout": dayStatus.color === 'workout-completed' && !isToday(day),
-                  "bg-workout-completed text-white shadow-workout border-2 border-blue-500": dayStatus.color === 'workout-completed' && isToday(day),
+                  "bg-workout-completed text-white shadow-workout border-2 border-blue-500": dayStatus.color === 'workout-completed' && isClient && isToday(day),
                   "border-2 border-blue-500 bg-background text-foreground": dayStatus.color === 'workout-today',
                   "bg-destructive text-white": dayStatus.color === 'workout-missed',
                   "bg-background hover:bg-accent": dayStatus.color === 'default',
@@ -154,7 +159,7 @@ export const WorkoutCalendar = ({ onDateSelect, selectedDate }: WorkoutCalendarP
               </div>
               
               {/* Indicador de hoje */}
-              {isToday(day) && !dayStatus.hasWorkout && (
+              {isClient && isToday(day) && !dayStatus.hasWorkout && (
                 <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-current rounded-full" />
               )}
             </button>
