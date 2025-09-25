@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workoutLogs   WorkoutLog[]
+  weightEntries WeightEntry[]
+}
+
+model WorkoutType {
+  id   String @id @default(uuid())
+  name String @unique // "Treino A", "Cardio", etc.
+  icon String // Emoji ou nome do ícone
+
+  workoutLogs WorkoutLog[]
+}
+
+model WorkoutLog {
+  id         String   @id @default(uuid())
+  date       DateTime
+  notes      String?
+  customType String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  typeId String
+  type   WorkoutType @relation(fields: [typeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date]) // Um usuário só pode ter um treino por dia
+}
+
+model WeightEntry {
+  id     String   @id @default(uuid())
+  date   DateTime
+  weight Float
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date]) // Um usuário só pode ter um registro de peso por dia
+}
