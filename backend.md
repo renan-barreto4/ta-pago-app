@@ -1,45 +1,30 @@
-# Plano de Implementação: Full-Stack com Next.js para "Tá Pago"
+# Plano de Implementação: Backend para "Tá Pago"
 
-Este documento descreve o plano para evoluir o protótipo "Tá Pago" para uma aplicação full-stack, migrando de Vite para Next.js e implementando o backend diretamente no ecossistema Next.js com um banco de dados PostgreSQL.
-
----
-
-## **Parte 1: Plano de Migração de Vite para Next.js**
-
-O objetivo desta fase é reestruturar o projeto atual para a arquitetura do Next.js, preservando os componentes e a lógica de UI existentes.
-
-### **1.1. Estrutura do Projeto e Dependências**
-1.  **Inicializar Projeto Next.js:** Criar um novo projeto Next.js com o App Router: `npx create-next-app@latest --typescript --tailwind --eslint`.
-2.  **Copiar Componentes:** Mover os componentes de `src/components` do projeto Vite para `components/` no projeto Next.js.
-3.  **Copiar Páginas:** Migrar a lógica de `src/pages/Index.tsx` para a página principal do Next.js em `app/page.tsx`.
-4.  **Instalar Dependências:** Adicionar as dependências do `package.json` anterior que ainda são necessárias (ex: `recharts`, `date-fns`, `lucide-react`).
-5.  **Configurar CSS:** Migrar as configurações de `tailwind.config.ts` e o CSS global de `index.css` para o `globals.css` do Next.js.
-6.  **Hooks e Libs:** Mover os arquivos de `src/hooks` e `src/lib` para diretórios equivalentes no novo projeto.
-
-### **1.2. Roteamento e Layout**
-1.  **Layout Principal:** Criar um `app/layout.tsx` que contenha a estrutura principal da página (header, navegação inferior).
-2.  **Página Principal:** O conteúdo de `app/page.tsx` será a página do calendário, que é a tela inicial.
-3.  **Gerenciamento de Estado de Abas:** A lógica de troca de abas (Calendário, Estatísticas, etc.) será mantida no `page.tsx` principal, renderizando os componentes condicionalmente.
+Este documento descreve o plano para construir o backend do aplicativo "Tá Pago", substituindo o `localStorage` por um servidor robusto e um banco de dados PostgreSQL.
 
 ---
 
-## **Parte 2: Plano de Implementação do Backend em Next.js**
+## 1. Arquitetura e Stack Tecnológica
 
-Com o frontend migrado, esta fase foca na construção da lógica de servidor usando as funcionalidades do Next.js.
+Para manter a sinergia com o frontend, a stack escolhida é baseada em TypeScript.
 
-### **2.1. Arquitetura e Stack Tecnológica**
-- **Framework Full-Stack:** Next.js (com App Router)
+- **Plataforma:** Node.js
+- **Framework:** Express.js (para roteamento e middlewares)
 - **Linguagem:** TypeScript
-- **ORM:** Prisma
+- **ORM (Object-Relational Mapping):** Prisma (facilita a interação com o banco de dados e garante a tipagem)
 - **Banco de Dados:** PostgreSQL
-- **Autenticação:** Next-Auth.js (para integração simplificada com React)
-- **Validação:** Zod
+- **Autenticação:** JWT (JSON Web Tokens)
+- **Validação:** Zod (para validar os payloads da API)
 
-### **2.2. Esquema do Banco de Dados (Prisma Schema)**
-O esquema do banco de dados permanece o mesmo do plano anterior, pois os requisitos de dados não mudaram.
+---
+
+## 2. Esquema do Banco de Dados (Prisma Schema)
+
+O esquema abaixo define as tabelas necessárias para suportar as funcionalidades da aplicação.
 
 ```prisma
-// file: prisma/schema.prisma
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -61,42 +46,103 @@ model User {
   weightEntries WeightEntry[]
 }
 
-// ... (outros modelos: WorkoutType, WorkoutLog, WeightEntry) ...
+model WorkoutType {
+  id    String @id @default(uuid())
+  name  String @unique // "Treino A", "Cardio", etc.
+  icon  String // Emoji ou nome do ícone
+
+  workoutLogs WorkoutLog[]
+}
+
+model WorkoutLog {
+  id          String   @id @default(uuid())
+  date        DateTime
+  notes       String?
+  customType  String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  typeId String
+  type   WorkoutType @relation(fields: [typeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date]) // Um usuário só pode ter um treino por dia
+}
+
+model WeightEntry {
+  id     String   @id @default(uuid())
+  date   DateTime
+  weight Float
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date]) // Um usuário só pode ter um registro de peso por dia
+}
 ```
 
-### **2.3. API Routes e Server Actions**
-Os endpoints serão criados como API Routes dentro do diretório `app/api/`.
+---
 
-- **Autenticação:**
-  - `app/api/auth/[...nextauth]/route.ts`: Rota catch-all para o Next-Auth.js, que gerenciará o login, registro e sessão.
-- **Tipos de Treino:**
-  - `app/api/workout-types/route.ts` -> `GET`: Listar todos os tipos de treino.
-- **Registros de Treino:**
-  - `app/api/workouts/route.ts` -> `GET`, `POST`
-  - `app/api/workouts/[id]/route.ts` -> `PUT`, `DELETE`
-- **Registros de Peso:**
-  - `app/api/weight/route.ts` -> `GET`, `POST`
-  - `app/api/weight/[id]/route.ts` -> `PUT`, `DELETE`
-- **Estatísticas:**
-  - `app/api/stats/route.ts` -> `GET`
+## 3. Endpoints da API REST
 
-### **2.4. Roteiro de Implementação em Fases**
+A seguir estão os endpoints necessários para a comunicação com o frontend.
 
-#### **Fase 1: Configuração da Fundação**
-1.  **Integrar Prisma:** Adicionar o Prisma ao projeto Next.js e conectar ao banco de dados PostgreSQL (localmente via Docker).
-2.  **Configurar Next-Auth.js:**
-    - Instalar `next-auth`.
-    - Configurar o provedor de `Credentials` para login com e-mail e senha.
-    - Usar o adapter do Prisma para o Next-Auth.js para sincronizar usuários.
-3.  **Seed do Banco de Dados:** Criar o script de seed para popular os `WorkoutType`.
+### Autenticação (`/auth`)
+- `POST /auth/register`: Registrar um novo usuário.
+- `POST /auth/login`: Autenticar um usuário e retornar um JWT.
 
-#### **Fase 2: Implementação das API Routes**
-1.  **CRUD de Treinos:** Criar os handlers para as rotas de `/api/workouts`, garantindo que as operações sejam autenticadas e associadas ao usuário da sessão.
-2.  **CRUD de Pesos:** Implementar as rotas para `/api/weight`.
-3.  **Lógica de Estatísticas:** Criar a rota `/api/stats` que executa as queries complexas no servidor para calcular as métricas.
+### Tipos de Treino (`/workout-types`)
+- `GET /workout-types`: Listar todos os tipos de treino pré-definidos.
 
-#### **Fase 3: Integração com o Frontend**
-1.  **Hooks de Dados:** Refatorar os hooks (`useFitLog`, `useWeightTracker`) para usar `fetch` para chamar as API Routes internas, em vez de `localStorage`. O uso de `SWR` ou `React Query` é recomendado para caching e revalidação.
-2.  **Autenticação no Cliente:** Usar o hook `useSession` do Next-Auth.js para gerenciar o estado de login na UI.
-3.  **Proteger a UI:** Envolver a página principal em um componente que verifica se o usuário está autenticado, redirecionando para uma página de login caso contrário.
-4.  **Server Components:** Onde possível (ex: na listagem inicial de dados), usar Server Components para buscar dados diretamente no servidor, melhorando a performance de carregamento inicial.
+### Registros de Treino (`/workouts`)
+- `POST /workouts`: Criar um novo registro de treino para o usuário autenticado.
+- `GET /workouts`: Listar todos os treinos do usuário (com filtros de data).
+- `PUT /workouts/:id`: Atualizar um registro de treino existente.
+- `DELETE /workouts/:id`: Deletar um registro de treino.
+
+### Registros de Peso (`/weight`)
+- `POST /weight`: Criar um novo registro de peso.
+- `GET /weight`: Listar todos os registros de peso do usuário (com filtros de data).
+- `PUT /weight/:id`: Atualizar um registro de peso.
+- `DELETE /weight/:id`: Deletar um registro de peso.
+
+### Estatísticas (`/stats`)
+- `GET /stats`: Obter as estatísticas calculadas (total, sequência, etc.) para um determinado período (semana, mês, ano). O backend fará a lógica de cálculo.
+
+---
+
+## 4. Roteiro de Implementação em Fases
+
+### Fase 1: Configuração e Fundação do Backend
+1.  **Inicializar Projeto:** Criar um novo diretório `backend/` e inicializar um projeto Node.js com `npm init`.
+2.  **Instalar Dependências:** Adicionar `express`, `prisma`, `typescript`, `ts-node`, `pg`, `dotenv`, `bcryptjs`, `jsonwebtoken`, `zod`.
+3.  **Configurar TypeScript:** Criar um `tsconfig.json` com as configurações adequadas para um projeto Node.js.
+4.  **Configurar Prisma:** Executar `npx prisma init` e configurar o `schema.prisma` com o modelo de dados definido acima.
+5.  **Docker para Postgres:** Criar um `docker-compose.yml` para subir uma instância do PostgreSQL localmente, facilitando o desenvolvimento.
+6.  **Estrutura de Pastas:** Definir a estrutura de pastas (ex: `src/routes`, `src/controllers`, `src/services`).
+
+### Fase 2: Autenticação de Usuários
+1.  **Implementar Rota de Registro:** Criar o controller e o serviço para a rota `POST /auth/register`, incluindo o hash da senha com `bcrypt`.
+2.  **Implementar Rota de Login:** Criar a rota `POST /auth/login`, comparando a senha e gerando um JWT em caso de sucesso.
+3.  **Criar Middleware de Autenticação:** Desenvolver um middleware para Express que verifica o token JWT em rotas protegidas e anexa os dados do usuário à requisição.
+
+### Fase 3: Implementação do CRUD Core
+1.  **CRUD de Treinos:** Implementar todas as rotas de `/workouts`, protegendo-as com o middleware de autenticação.
+2.  **CRUD de Pesos:** Implementar as rotas de `/weight`, também protegidas.
+3.  **Seed de Tipos de Treino:** Criar um script de seed do Prisma para popular a tabela `WorkoutType` com os valores padrão.
+
+### Fase 4: Endpoints de Lógica de Negócio
+1.  **Implementar Rota de Estatísticas:** Criar a rota `GET /stats` que recebe um período como query param.
+2.  **Desenvolver Lógica de Cálculo:** No lado do servidor, criar as funções para calcular o total de treinos, a sequência de dias, a consistência e as distribuições, com base nos dados do usuário autenticado.
+
+### Fase 5: Integração com o Frontend
+1.  **Configurar Proxy:** Ajustar o `vite.config.ts` do frontend para usar um proxy, facilitando as chamadas à API local.
+2.  **Remover Hooks Mocks:** Modificar os hooks (`useFitLog`, `useWeightTracker`) para, em vez de usar `localStorage`, fazerem chamadas à API do backend usando `fetch` ou uma biblioteca como `axios`.
+3.  **Implementar Fluxo de Login no Frontend:** Criar as telas de Login/Registro e gerenciar o estado de autenticação (armazenar o JWT).
+4.  **Proteger Rotas no Frontend:** Garantir que o usuário só possa acessar a aplicação principal após estar autenticado.
