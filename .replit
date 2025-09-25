@@ -1,7 +1,6 @@
 modules = ["nodejs-20", "web"]
 [agent]
 expertMode = true
-integrations = ["javascript_database:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
@@ -21,32 +20,24 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Next.js App"
+args = "Start application"
 
 [[workflows.workflow]]
-name = "Next.js App"
+name = "Start application"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd ta-pago-nextjs && npm run dev"
+args = "npm run dev"
 waitForPort = 5000
 
 [workflows.workflow.metadata]
 outputType = "webview"
 
 [[ports]]
-localPort = 3000
-externalPort = 3000
-
-[[ports]]
 localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 44729
-externalPort = 3001
-
-[[ports]]
-localPort = 45689
-externalPort = 3002
+localPort = 34123
+externalPort = 3000
