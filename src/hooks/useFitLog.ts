@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, isSameDay } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 export interface Exercise {
   id: string;
   name: string;
   sets: number;
-  reps: string; // Pode ser "10-12" ou "15" ou "máximo"
+  reps: string;
 }
 
 export interface WorkoutType {
@@ -36,177 +38,241 @@ export interface WorkoutStats {
   percentage: number;
 }
 
-// Tipos de treino predefinidos
-const DEFAULT_WORKOUT_TYPES: WorkoutType[] = [
-  { id: '1', name: 'Treino A', icon: '🅰️', color: 'hsl(142 76% 36%)' },
-  { id: '2', name: 'Treino B', icon: '🅱️', color: 'hsl(217 91% 60%)' },
-  { id: '4', name: 'Treino C', icon: '🔥', color: 'hsl(195 92% 50%)' },
-  { id: '5', name: 'Treino D', icon: '💪', color: 'hsl(25 95% 53%)' },
-  { id: '6', name: 'Treino E', icon: '⚡', color: 'hsl(120 76% 36%)' },
-  { id: '7', name: 'Treino F', icon: '🏋️', color: 'hsl(0 84% 60%)' },
-  { id: '8', name: 'Treino G', icon: '🚀', color: 'hsl(300 76% 46%)' },
-  { id: '9', name: 'Treino H', icon: '🎯', color: 'hsl(45 93% 47%)' },
-  { id: '10', name: 'Treino I', icon: '💯', color: 'hsl(330 81% 60%)' },
-];
-
-// Mock de dados iniciais para demonstração (usando datas do mês atual)
-const now = new Date();
-const currentYear = now.getFullYear();
-const currentMonth = now.getMonth();
-
-const MOCK_WORKOUTS: Workout[] = [
-  {
-    id: '1',
-    date: new Date(2025, 8, 22), // 22/09/2025
-    typeId: '1',
-    notes: 'Treino A completo',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '2',
-    date: new Date(currentYear, currentMonth, 20),
-    typeId: '1',
-    notes: 'Treino A - Peito e tríceps',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '3',
-    date: new Date(currentYear, currentMonth, 18),
-    typeId: '2',
-    notes: 'Treino B - Costas e bíceps',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '3',
-    date: new Date(currentYear, currentMonth, 17),
-    typeId: '4',
-    notes: 'Treino C - Intenso',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '4',
-    date: new Date(currentYear, currentMonth, 19),
-    typeId: '5',
-    notes: 'Treino D - Força',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '5',
-    date: new Date(currentYear, currentMonth, 15),
-    typeId: '6',
-    notes: 'Treino E - Explosivo',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '6',
-    date: new Date(currentYear, currentMonth, 12),
-    typeId: '7',
-    notes: 'Treino F - Funcional',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '7',
-    date: new Date(currentYear, currentMonth, 11),
-    typeId: '8',
-    notes: 'Treino G - Rápido',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '8',
-    date: new Date(currentYear, currentMonth, 10),
-    typeId: '9',
-    notes: 'Treino H - Foco',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
-
 export const useFitLog = () => {
-  const [workouts, setWorkouts] = useState<Workout[]>(MOCK_WORKOUTS);
-  const [workoutTypes, setWorkoutTypes] = useState<WorkoutType[]>(DEFAULT_WORKOUT_TYPES);
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [workoutTypes, setWorkoutTypes] = useState<WorkoutType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  // Simular carregamento de dados (mock)
+  // Carregar tipos de treino do Supabase
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
+    loadWorkoutTypes();
+    loadWorkouts();
   }, []);
+
+  const loadWorkoutTypes = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('workout_types')
+        .select('*')
+        .order('name');
+
+      if (error) throw error;
+
+      const types = (data || []).map(type => ({
+        id: type.id,
+        name: type.name,
+        icon: type.icon,
+        color: type.color,
+      }));
+
+      setWorkoutTypes(types);
+    } catch (error) {
+      console.error('Erro ao carregar tipos de treino:', error);
+    }
+  };
+
+  const loadWorkouts = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('workouts')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (error) throw error;
+
+      const workoutsData = (data || []).map(workout => ({
+        id: workout.id,
+        date: new Date(workout.date),
+        typeId: workout.type_id,
+        customType: workout.custom_type || undefined,
+        notes: workout.notes || undefined,
+        createdAt: new Date(workout.created_at),
+        updatedAt: new Date(workout.updated_at),
+      }));
+
+      setWorkouts(workoutsData);
+    } catch (error) {
+      console.error('Erro ao carregar treinos:', error);
+      toast({
+        title: 'Erro ao carregar treinos',
+        description: 'Não foi possível carregar seus treinos.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Salvar treino
   const saveWorkout = useCallback(async (workoutData: Omit<Workout, 'id' | 'createdAt' | 'updatedAt'>) => {
     setIsLoading(true);
     
     try {
-      // Simular delay da API
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
       // Verificar se já existe treino na mesma data
       const existingWorkout = workouts.find(w => isSameDay(w.date, workoutData.date));
       
       if (existingWorkout) {
         // Atualizar treino existente
+        const { data, error } = await supabase
+          .from('workouts')
+          .update({
+            type_id: workoutData.typeId,
+            custom_type: workoutData.customType || null,
+            notes: workoutData.notes || null,
+          })
+          .eq('id', existingWorkout.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        const updated: Workout = {
+          id: data.id,
+          date: new Date(data.date),
+          typeId: data.type_id,
+          customType: data.custom_type || undefined,
+          notes: data.notes || undefined,
+          createdAt: new Date(data.created_at),
+          updatedAt: new Date(data.updated_at),
+        };
+
         setWorkouts(prev => prev.map(workout => 
-          workout.id === existingWorkout.id 
-            ? { ...workout, ...workoutData, updatedAt: new Date() }
-            : workout
+          workout.id === existingWorkout.id ? updated : workout
         ));
+
+        toast({
+          title: 'Treino atualizado',
+          description: 'Seu treino foi atualizado com sucesso.',
+        });
+
         setIsLoading(false);
-        return existingWorkout;
+        return updated;
       } else {
         // Criar novo treino
+        const { data, error } = await supabase
+          .from('workouts')
+          .insert({
+            user_id: user.id,
+            date: workoutData.date.toISOString().split('T')[0],
+            type_id: workoutData.typeId,
+            custom_type: workoutData.customType || null,
+            notes: workoutData.notes || null,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
         const newWorkout: Workout = {
-          ...workoutData,
-          id: Date.now().toString(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          id: data.id,
+          date: new Date(data.date),
+          typeId: data.type_id,
+          customType: data.custom_type || undefined,
+          notes: data.notes || undefined,
+          createdAt: new Date(data.created_at),
+          updatedAt: new Date(data.updated_at),
         };
 
         setWorkouts(prev => [...prev, newWorkout]);
+
+        toast({
+          title: 'Treino registrado',
+          description: 'Seu treino foi registrado com sucesso.',
+        });
+
         setIsLoading(false);
         return newWorkout;
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Erro ao salvar treino:', error);
+      toast({
+        title: 'Erro ao salvar treino',
+        description: error.message || 'Não foi possível salvar o treino.',
+        variant: 'destructive',
+      });
       setIsLoading(false);
       throw error;
     }
-  }, [workouts]);
+  }, [workouts, toast]);
 
   // Atualizar treino
   const updateWorkout = useCallback(async (id: string, workoutData: Partial<Omit<Workout, 'id' | 'createdAt'>>) => {
     setIsLoading(true);
     
-    // Simular delay da API
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    setWorkouts(prev => prev.map(workout => 
-      workout.id === id 
-        ? { ...workout, ...workoutData, updatedAt: new Date() }
-        : workout
-    ));
-    setIsLoading(false);
-  }, []);
+    try {
+      const updateData: any = {};
+      if (workoutData.typeId) updateData.type_id = workoutData.typeId;
+      if (workoutData.customType !== undefined) updateData.custom_type = workoutData.customType || null;
+      if (workoutData.notes !== undefined) updateData.notes = workoutData.notes || null;
+      if (workoutData.date) updateData.date = workoutData.date.toISOString().split('T')[0];
+
+      const { error } = await supabase
+        .from('workouts')
+        .update(updateData)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setWorkouts(prev => prev.map(workout => 
+        workout.id === id 
+          ? { ...workout, ...workoutData, updatedAt: new Date() }
+          : workout
+      ));
+
+      toast({
+        title: 'Treino atualizado',
+        description: 'Seu treino foi atualizado com sucesso.',
+      });
+
+      setIsLoading(false);
+    } catch (error: any) {
+      console.error('Erro ao atualizar treino:', error);
+      toast({
+        title: 'Erro ao atualizar',
+        description: error.message || 'Não foi possível atualizar o treino.',
+        variant: 'destructive',
+      });
+      setIsLoading(false);
+      throw error;
+    }
+  }, [toast]);
 
   // Deletar treino
   const deleteWorkout = useCallback(async (id: string) => {
     setIsLoading(true);
     
-    // Simular delay da API
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    setWorkouts(prev => prev.filter(workout => workout.id !== id));
-    setIsLoading(false);
-  }, []);
+    try {
+      const { error } = await supabase
+        .from('workouts')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setWorkouts(prev => prev.filter(workout => workout.id !== id));
+
+      toast({
+        title: 'Treino excluído',
+        description: 'Seu treino foi excluído com sucesso.',
+      });
+
+      setIsLoading(false);
+    } catch (error: any) {
+      console.error('Erro ao excluir treino:', error);
+      toast({
+        title: 'Erro ao excluir',
+        description: error.message || 'Não foi possível excluir o treino.',
+        variant: 'destructive',
+      });
+      setIsLoading(false);
+      throw error;
+    }
+  }, [toast]);
 
   // Obter treino por data
   const getWorkoutByDate = useCallback((date: Date) => {
@@ -226,7 +292,7 @@ export const useFitLog = () => {
     
     switch (period) {
       case 'week':
-        start = startOfWeek(date, { weekStartsOn: 1 }); // Segunda-feira
+        start = startOfWeek(date, { weekStartsOn: 1 });
         end = endOfWeek(date, { weekStartsOn: 1 });
         break;
       case 'month':
@@ -241,7 +307,7 @@ export const useFitLog = () => {
 
     const periodWorkouts = getWorkoutsByPeriod(start, end);
     const today = new Date();
-    const endDate = end > today ? today : end; // Não contar dias futuros
+    const endDate = end > today ? today : end;
     const totalDays = Math.ceil((endDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
     const workoutDays = new Set(periodWorkouts.map(w => format(w.date, 'yyyy-MM-dd'))).size;
     
@@ -254,10 +320,7 @@ export const useFitLog = () => {
     
     const mostFrequentType = Object.entries(typeCount).sort(([,a], [,b]) => b - a)[0]?.[0] || 'Nenhum';
     
-    // Calcular sequência máxima de treinos consecutivos no período
     const streak = calculateMaxStreakInPeriod(periodWorkouts);
-
-    // Calcular dias perdidos (apenas dias passados sem treino)
     const lostDays = Math.max(0, totalDays - workoutDays);
 
     const stats: WorkoutStats = {
@@ -273,7 +336,6 @@ export const useFitLog = () => {
     return stats;
   }, [workouts, workoutTypes, getWorkoutsByPeriod]);
 
-  // Calcular sequência máxima de treinos consecutivos no período
   const calculateMaxStreakInPeriod = useCallback((periodWorkouts: Workout[]) => {
     if (periodWorkouts.length === 0) return 0;
 
@@ -298,7 +360,6 @@ export const useFitLog = () => {
     return Math.max(maxStreak, currentStreak);
   }, []);
 
-  // Calcular sequência de dias consecutivos (mantida para compatibilidade)
   const calculateStreak = useCallback((allWorkouts: Workout[], fromDate: Date = new Date()) => {
     const sortedDates = allWorkouts
       .map(w => format(w.date, 'yyyy-MM-dd'))
@@ -308,7 +369,7 @@ export const useFitLog = () => {
     let streak = 0;
     let currentDate = new Date(fromDate);
     
-    for (let i = 0; i < 365; i++) { // Máximo de 1 ano
+    for (let i = 0; i < 365; i++) {
       const dateStr = format(currentDate, 'yyyy-MM-dd');
       if (sortedDates.includes(dateStr)) {
         streak++;
@@ -346,7 +407,6 @@ export const useFitLog = () => {
       const type = workout.customType || workoutTypes.find(t => t.id === workout.typeId)?.name || 'Outro';
       let typeData = workoutTypes.find(t => t.name === type);
       
-      // Fallback para casos onde o tipo não é encontrado (tipos removidos)
       if (!typeData) {
         typeData = {
           id: 'fallback',
@@ -401,14 +461,14 @@ export const useFitLog = () => {
     
     periodWorkouts.forEach(workout => {
       const dayOfWeek = workout.date.getDay();
-      const index = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Ajustar para começar na segunda
+      const index = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
       distribution[index].value++;
     });
 
     return distribution;
   }, [getWorkoutsByPeriod]);
 
-  // Obter distribuição por mês (apenas para período anual)
+  // Obter distribuição por mês
   const getMonthDistribution = useCallback((date: Date = new Date()) => {
     const start = startOfYear(date);
     const end = endOfYear(date);
@@ -434,63 +494,118 @@ export const useFitLog = () => {
     setIsLoading(true);
     
     try {
-      // Simular delay da API
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
+      const { data, error } = await supabase
+        .from('workout_types')
+        .insert({
+          name: typeData.name,
+          icon: typeData.icon,
+          color: typeData.color,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
       const newType: WorkoutType = {
-        ...typeData,
-        id: Date.now().toString(),
+        id: data.id,
+        name: data.name,
+        icon: data.icon,
+        color: data.color,
       };
 
       setWorkoutTypes(prev => [...prev, newType]);
+      
+      toast({
+        title: 'Tipo de treino criado',
+        description: 'Novo tipo de treino adicionado com sucesso.',
+      });
+
       setIsLoading(false);
       return newType;
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Erro ao adicionar tipo de treino:', error);
+      toast({
+        title: 'Erro ao criar tipo',
+        description: error.message || 'Não foi possível criar o tipo de treino.',
+        variant: 'destructive',
+      });
       setIsLoading(false);
       throw error;
     }
-  }, []);
+  }, [toast]);
 
   // Atualizar tipo de treino
   const updateWorkoutType = useCallback(async (id: string, typeData: Partial<Omit<WorkoutType, 'id'>>) => {
     setIsLoading(true);
     
     try {
-      // Simular delay da API
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
+      const updateData: any = {};
+      if (typeData.name) updateData.name = typeData.name;
+      if (typeData.icon) updateData.icon = typeData.icon;
+      if (typeData.color) updateData.color = typeData.color;
+
+      const { error } = await supabase
+        .from('workout_types')
+        .update(updateData)
+        .eq('id', id);
+
+      if (error) throw error;
+
       setWorkoutTypes(prev => prev.map(type => 
         type.id === id 
           ? { ...type, ...typeData }
           : type
       ));
+
+      toast({
+        title: 'Tipo atualizado',
+        description: 'Tipo de treino atualizado com sucesso.',
+      });
+
       setIsLoading(false);
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Erro ao atualizar tipo de treino:', error);
+      toast({
+        title: 'Erro ao atualizar',
+        description: error.message || 'Não foi possível atualizar o tipo.',
+        variant: 'destructive',
+      });
       setIsLoading(false);
       throw error;
     }
-  }, []);
+  }, [toast]);
 
   // Remover tipo de treino
   const removeWorkoutType = useCallback(async (id: string) => {
     setIsLoading(true);
     
     try {
-      // Simular delay da API
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Não permitir remover tipos padrão
-      if (['1', '2', '4', '5', '6', '7'].includes(id)) {
-        throw new Error('Não é possível remover tipos de treino padrão');
-      }
-      
+      const { error } = await supabase
+        .from('workout_types')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
       setWorkoutTypes(prev => prev.filter(type => type.id !== id));
+
+      toast({
+        title: 'Tipo excluído',
+        description: 'Tipo de treino excluído com sucesso.',
+      });
+
       setIsLoading(false);
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Erro ao remover tipo de treino:', error);
+      toast({
+        title: 'Erro ao excluir',
+        description: error.message || 'Não foi possível excluir o tipo.',
+        variant: 'destructive',
+      });
       setIsLoading(false);
       throw error;
     }
-  }, []);
+  }, [toast]);
 
   return {
     // Estado

@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 export interface WeightEntry {
   id: string;
@@ -7,48 +9,145 @@ export interface WeightEntry {
   createdAt: Date;
 }
 
-// Mock data for demonstration (empty by default)
-const MOCK_WEIGHT_ENTRIES: WeightEntry[] = [];
-
 export const useWeightTracker = () => {
   const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
-  // Simulate loading data
+  // Carregar dados do Supabase
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setWeightEntries(MOCK_WEIGHT_ENTRIES);
-      setIsLoading(false);
-    }, 500);
-
-    return () => clearTimeout(timer);
+    loadWeightEntries();
   }, []);
 
-  const addWeightEntry = (weight: number, date: Date = new Date()) => {
-    const newEntry: WeightEntry = {
-      id: Date.now().toString(),
-      weight,
-      date,
-      createdAt: new Date(),
-    };
+  const loadWeightEntries = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('weight_entries')
+        .select('*')
+        .order('date', { ascending: false });
 
-    setWeightEntries(prev => [newEntry, ...prev].sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    ));
+      if (error) throw error;
+
+      const entries = (data || []).map(entry => ({
+        id: entry.id,
+        weight: Number(entry.weight),
+        date: new Date(entry.date),
+        createdAt: new Date(entry.created_at),
+      }));
+
+      setWeightEntries(entries);
+    } catch (error) {
+      console.error('Erro ao carregar registros de peso:', error);
+      toast({
+        title: 'Erro ao carregar registros',
+        description: 'Não foi possível carregar seus registros de peso.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const updateWeightEntry = (id: string, weight: number, date: Date) => {
-    setWeightEntries(prev => 
-      prev.map(entry => 
-        entry.id === id 
-          ? { ...entry, weight, date }
-          : entry
-      ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    );
+  const addWeightEntry = async (weight: number, date: Date = new Date()) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const { data, error } = await supabase
+        .from('weight_entries')
+        .insert({
+          user_id: user.id,
+          weight,
+          date: date.toISOString().split('T')[0],
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newEntry: WeightEntry = {
+        id: data.id,
+        weight: Number(data.weight),
+        date: new Date(data.date),
+        createdAt: new Date(data.created_at),
+      };
+
+      setWeightEntries(prev => [newEntry, ...prev].sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      ));
+
+      toast({
+        title: 'Peso registrado',
+        description: 'Seu peso foi registrado com sucesso.',
+      });
+    } catch (error: any) {
+      console.error('Erro ao adicionar registro de peso:', error);
+      toast({
+        title: 'Erro ao registrar peso',
+        description: error.message || 'Não foi possível registrar o peso.',
+        variant: 'destructive',
+      });
+    }
   };
 
-  const deleteWeightEntry = (id: string) => {
-    setWeightEntries(prev => prev.filter(entry => entry.id !== id));
+  const updateWeightEntry = async (id: string, weight: number, date: Date) => {
+    try {
+      const { error } = await supabase
+        .from('weight_entries')
+        .update({
+          weight,
+          date: date.toISOString().split('T')[0],
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setWeightEntries(prev => 
+        prev.map(entry => 
+          entry.id === id 
+            ? { ...entry, weight, date }
+            : entry
+        ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      );
+
+      toast({
+        title: 'Peso atualizado',
+        description: 'Seu registro foi atualizado com sucesso.',
+      });
+    } catch (error: any) {
+      console.error('Erro ao atualizar registro de peso:', error);
+      toast({
+        title: 'Erro ao atualizar',
+        description: error.message || 'Não foi possível atualizar o registro.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const deleteWeightEntry = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('weight_entries')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setWeightEntries(prev => prev.filter(entry => entry.id !== id));
+
+      toast({
+        title: 'Registro excluído',
+        description: 'Seu registro foi excluído com sucesso.',
+      });
+    } catch (error: any) {
+      console.error('Erro ao excluir registro de peso:', error);
+      toast({
+        title: 'Erro ao excluir',
+        description: error.message || 'Não foi possível excluir o registro.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const getFilteredEntries = (period: '7d' | '30d' | '90d' | '1y' | 'all') => {
