@@ -29,6 +29,9 @@ const COLOR_OPTIONS = [
 export const WorkoutTypes = () => {
   const { workoutTypes, updateWorkoutType } = useFitLog();
   const { toast } = useToast();
+  
+  console.log('🎯 WorkoutTypes - workoutTypes:', workoutTypes);
+  console.log('🎯 WorkoutTypes - quantidade:', workoutTypes.length);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingType, setEditingType] = useState<any>(null);
   const [formData, setFormData] = useState({
