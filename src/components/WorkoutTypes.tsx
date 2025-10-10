@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Edit2, X, Plus, Trash2 } from 'lucide-react';
+import { Edit2, X, Plus, Trash2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,7 +27,7 @@ const COLOR_OPTIONS = [
 ];
 
 export const WorkoutTypes = () => {
-  const { workoutTypes, updateWorkoutType, addWorkoutType } = useFitLog();
+  const { workoutTypes, updateWorkoutType } = useFitLog();
   const { toast } = useToast();
   
   console.log('🎯 WorkoutTypes - workoutTypes:', workoutTypes);
@@ -44,24 +44,14 @@ export const WorkoutTypes = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
 
-  const handleOpenModal = (type?: any) => {
-    if (type) {
-      setEditingType(type);
-      setFormData({
-        name: type.name,
-        icon: type.icon,
-        color: type.color,
-        exercises: type.exercises || []
-      });
-    } else {
-      setEditingType(null);
-      setFormData({
-        name: '',
-        icon: '💪',
-        color: 'hsl(142 76% 36%)',
-        exercises: []
-      });
-    }
+  const handleOpenModal = (type: any) => {
+    setEditingType(type);
+    setFormData({
+      name: type.name,
+      icon: type.icon,
+      color: type.color,
+      exercises: type.exercises || []
+    });
     setIsModalOpen(true);
   };
 
@@ -124,23 +114,13 @@ export const WorkoutTypes = () => {
     }
 
     try {
-      if (editingType) {
-        await updateWorkoutType(editingType.id, formData);
-        toast({
-          title: "Tipo de treino atualizado!",
-          description: "As alterações foram salvas com sucesso",
-          className: "border-green-600 bg-green-50 text-green-900",
-          duration: 3000,
-        });
-      } else {
-        await addWorkoutType(formData);
-        toast({
-          title: "Tipo de treino criado!",
-          description: "O novo tipo foi adicionado com sucesso",
-          className: "border-green-600 bg-green-50 text-green-900",
-          duration: 3000,
-        });
-      }
+      await updateWorkoutType(editingType.id, formData);
+      toast({
+        title: "Tipo de treino atualizado!",
+        description: "As alterações foram salvas com sucesso",
+        className: "border-green-600 bg-green-50 text-green-900",
+        duration: 3000,
+      });
       handleCloseModal();
       // Forçar recarregamento da página para atualizar a lista
       window.location.reload();
@@ -157,15 +137,9 @@ export const WorkoutTypes = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">Tipos de Treino</h2>
-          <p className="text-muted-foreground">Gerencie os tipos de treino disponíveis</p>
-        </div>
-        <Button onClick={() => handleOpenModal()} className="bg-gradient-primary">
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Tipo
-        </Button>
+      <div>
+        <h2 className="text-2xl font-bold text-foreground">Tipos de Treino</h2>
+        <p className="text-muted-foreground">Gerencie os tipos de treino disponíveis</p>
       </div>
 
       {/* Modal de edição */}
@@ -177,7 +151,7 @@ export const WorkoutTypes = () => {
             <Card className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-card shadow-modal animate-scale-in">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                 <CardTitle className="text-lg font-semibold text-foreground">
-                  {editingType ? 'Editar Treino' : 'Novo Tipo de Treino'}
+                  Editar Treino
                 </CardTitle>
                 <Button variant="outline" size="sm" onClick={handleCloseModal} className="h-8 w-8 p-0">
                   <X className="h-4 w-4" />
@@ -330,7 +304,7 @@ export const WorkoutTypes = () => {
                       Cancelar
                     </Button>
                     <Button type="submit" className="flex-1 bg-gradient-primary">
-                      {editingType ? 'Atualizar' : 'Criar'}
+                      Atualizar
                     </Button>
                   </div>
                 </form>
@@ -346,19 +320,15 @@ export const WorkoutTypes = () => {
           <Card className="p-12 text-center">
             <div className="flex flex-col items-center gap-4">
               <div className="rounded-full bg-muted p-6">
-                <Plus className="h-12 w-12 text-muted-foreground" />
+                <AlertCircle className="h-12 w-12 text-muted-foreground" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Nenhum tipo de treino cadastrado
+                  Carregando tipos de treino...
                 </h3>
-                <p className="text-muted-foreground mb-4">
-                  Comece criando seu primeiro tipo de treino
+                <p className="text-muted-foreground">
+                  Aguarde enquanto carregamos os tipos de treino disponíveis
                 </p>
-                <Button onClick={() => handleOpenModal()} className="bg-gradient-primary">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Criar Primeiro Tipo
-                </Button>
               </div>
             </div>
           </Card>
