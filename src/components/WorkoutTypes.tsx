@@ -27,11 +27,12 @@ const COLOR_OPTIONS = [
 ];
 
 export const WorkoutTypes = () => {
-  const { workoutTypes, updateWorkoutType } = useFitLog();
+  const { workoutTypes, updateWorkoutType, addWorkoutType } = useFitLog();
   const { toast } = useToast();
   
   console.log('🎯 WorkoutTypes - workoutTypes:', workoutTypes);
   console.log('🎯 WorkoutTypes - quantidade:', workoutTypes.length);
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingType, setEditingType] = useState<any>(null);
   const [formData, setFormData] = useState({
@@ -43,14 +44,24 @@ export const WorkoutTypes = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
 
-  const handleOpenModal = (type: any) => {
-    setEditingType(type);
-    setFormData({
-      name: type.name,
-      icon: type.icon,
-      color: type.color,
-      exercises: type.exercises || []
-    });
+  const handleOpenModal = (type?: any) => {
+    if (type) {
+      setEditingType(type);
+      setFormData({
+        name: type.name,
+        icon: type.icon,
+        color: type.color,
+        exercises: type.exercises || []
+      });
+    } else {
+      setEditingType(null);
+      setFormData({
+        name: '',
+        icon: '💪',
+        color: 'hsl(142 76% 36%)',
+        exercises: []
+      });
+    }
     setIsModalOpen(true);
   };
 
@@ -113,14 +124,26 @@ export const WorkoutTypes = () => {
     }
 
     try {
-      await updateWorkoutType(editingType.id, formData);
-      toast({
-        title: "Tipo de treino atualizado!",
-        description: "As alterações foram salvas com sucesso",
-        className: "border-green-600 bg-green-50 text-green-900",
-        duration: 3000,
-      });
+      if (editingType) {
+        await updateWorkoutType(editingType.id, formData);
+        toast({
+          title: "Tipo de treino atualizado!",
+          description: "As alterações foram salvas com sucesso",
+          className: "border-green-600 bg-green-50 text-green-900",
+          duration: 3000,
+        });
+      } else {
+        await addWorkoutType(formData);
+        toast({
+          title: "Tipo de treino criado!",
+          description: "O novo tipo foi adicionado com sucesso",
+          className: "border-green-600 bg-green-50 text-green-900",
+          duration: 3000,
+        });
+      }
       handleCloseModal();
+      // Forçar recarregamento da página para atualizar a lista
+      window.location.reload();
     } catch (error) {
       toast({
         variant: "destructive",
@@ -134,9 +157,15 @@ export const WorkoutTypes = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">Tipos de Treino</h2>
-        <p className="text-muted-foreground">Gerencie os tipos de treino disponíveis</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Tipos de Treino</h2>
+          <p className="text-muted-foreground">Gerencie os tipos de treino disponíveis</p>
+        </div>
+        <Button onClick={() => handleOpenModal()} className="bg-gradient-primary">
+          <Plus className="h-4 w-4 mr-2" />
+          Novo Tipo
+        </Button>
       </div>
 
       {/* Modal de edição */}
@@ -148,7 +177,7 @@ export const WorkoutTypes = () => {
             <Card className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-card shadow-modal animate-scale-in">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                 <CardTitle className="text-lg font-semibold text-foreground">
-                  Editar Treino
+                  {editingType ? 'Editar Treino' : 'Novo Tipo de Treino'}
                 </CardTitle>
                 <Button variant="outline" size="sm" onClick={handleCloseModal} className="h-8 w-8 p-0">
                   <X className="h-4 w-4" />
@@ -301,7 +330,7 @@ export const WorkoutTypes = () => {
                       Cancelar
                     </Button>
                     <Button type="submit" className="flex-1 bg-gradient-primary">
-                      Atualizar
+                      {editingType ? 'Atualizar' : 'Criar'}
                     </Button>
                   </div>
                 </form>
@@ -313,50 +342,72 @@ export const WorkoutTypes = () => {
 
       {/* Lista de tipos de treino */}
       <div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {workoutTypes.map((type) => (
-            <Card key={type.id} className="shadow-workout">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{type.icon}</span>
-                    <span className="font-medium">{type.name}</span>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleOpenModal(type)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div 
-                  className="w-full h-3 rounded-full"
-                  style={{ backgroundColor: type.color }}
-                />
-                
-                {type.exercises && type.exercises.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-foreground">Exercícios:</h4>
-                    <div className="space-y-1">
-                      {type.exercises.map((exercise) => (
-                        <div key={exercise.id} className="text-xs text-muted-foreground flex justify-between">
-                          <span>{exercise.name || 'Sem nome'}</span>
-                          <span>{exercise.sets}x {exercise.reps}</span>
-                        </div>
-                      ))}
+        {workoutTypes.length === 0 ? (
+          <Card className="p-12 text-center">
+            <div className="flex flex-col items-center gap-4">
+              <div className="rounded-full bg-muted p-6">
+                <Plus className="h-12 w-12 text-muted-foreground" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Nenhum tipo de treino cadastrado
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  Comece criando seu primeiro tipo de treino
+                </p>
+                <Button onClick={() => handleOpenModal()} className="bg-gradient-primary">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Criar Primeiro Tipo
+                </Button>
+              </div>
+            </div>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {workoutTypes.map((type) => (
+              <Card key={type.id} className="shadow-workout">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{type.icon}</span>
+                      <span className="font-medium">{type.name}</span>
                     </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleOpenModal(type)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div 
+                    className="w-full h-3 rounded-full"
+                    style={{ backgroundColor: type.color }}
+                  />
+                  
+                  {type.exercises && type.exercises.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium text-foreground">Exercícios:</h4>
+                      <div className="space-y-1">
+                        {type.exercises.map((exercise) => (
+                          <div key={exercise.id} className="text-xs text-muted-foreground flex justify-between">
+                            <span>{exercise.name || 'Sem nome'}</span>
+                            <span>{exercise.sets}x {exercise.reps}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
