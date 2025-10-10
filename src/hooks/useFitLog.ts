@@ -52,12 +52,18 @@ export const useFitLog = () => {
 
   const loadWorkoutTypes = async () => {
     try {
+      console.log('🔍 Carregando tipos de treino...');
       const { data, error } = await supabase
         .from('workout_types')
         .select('*')
         .order('name');
 
-      if (error) throw error;
+      console.log('📊 Resultado da query:', { data, error });
+
+      if (error) {
+        console.error('❌ Erro na query:', error);
+        throw error;
+      }
 
       const types = (data || []).map(type => ({
         id: type.id,
@@ -66,9 +72,10 @@ export const useFitLog = () => {
         color: type.color,
       }));
 
+      console.log('✅ Tipos de treino carregados:', types);
       setWorkoutTypes(types);
     } catch (error) {
-      console.error('Erro ao carregar tipos de treino:', error);
+      console.error('❌ Erro ao carregar tipos de treino:', error);
     }
   };
 
