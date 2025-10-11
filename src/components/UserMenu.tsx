@@ -150,7 +150,7 @@ export function UserMenu() {
 
       {/* Email Change Dialog */}
       <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
-        <DialogContent className="sm:rounded-xl backdrop-blur-sm">
+        <DialogContent className="sm:max-w-md bg-card shadow-modal border-border">
           <DialogHeader>
             <DialogTitle>Trocar Email</DialogTitle>
             <DialogDescription>
@@ -189,7 +189,7 @@ export function UserMenu() {
 
       {/* Password Change Dialog */}
       <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
-        <DialogContent className="sm:rounded-xl backdrop-blur-sm">
+        <DialogContent className="sm:max-w-md bg-card shadow-modal border-border">
           <DialogHeader>
             <DialogTitle>Redefinir Senha</DialogTitle>
             <DialogDescription>
