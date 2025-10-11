@@ -75,20 +75,13 @@ export default function Auth() {
 
         if (error) throw error;
 
-        // Login automático após criar conta
-        if (data.user) {
-          const { error: signInError } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
-
-          if (signInError) throw signInError;
-
-          toast({
-            title: 'Conta criada!',
-            description: 'Você foi conectado automaticamente.',
-          });
-        }
+        toast({
+          title: 'Conta criada com sucesso!',
+          description: 'Verifique seu email para confirmar sua conta antes de fazer login.',
+          duration: 7000,
+        });
+        
+        setIsLoading(false);
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
