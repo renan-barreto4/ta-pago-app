@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, isSameDay } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -161,11 +162,12 @@ export const useFitLog = () => {
         return updated;
       } else {
         // Criar novo treino
+        const dateStr = formatInTimeZone(workoutData.date, 'America/Sao_Paulo', 'yyyy-MM-dd');
         const { data, error } = await supabase
           .from('workouts')
           .insert({
             user_id: user.id,
-            date: workoutData.date.toISOString().split('T')[0],
+            date: dateStr,
             type_id: workoutData.typeId,
             custom_type: workoutData.customType || null,
             notes: workoutData.notes || null,
@@ -216,7 +218,7 @@ export const useFitLog = () => {
       if (workoutData.typeId) updateData.type_id = workoutData.typeId;
       if (workoutData.customType !== undefined) updateData.custom_type = workoutData.customType || null;
       if (workoutData.notes !== undefined) updateData.notes = workoutData.notes || null;
-      if (workoutData.date) updateData.date = workoutData.date.toISOString().split('T')[0];
+      if (workoutData.date) updateData.date = formatInTimeZone(workoutData.date, 'America/Sao_Paulo', 'yyyy-MM-dd');
 
       const { error } = await supabase
         .from('workouts')
