@@ -639,7 +639,7 @@ export const useFitLog = () => {
   }, [toast]);
 
   // Atualizar tipo de treino
-  const updateWorkoutType = useCallback(async (id: string, typeData: Partial<Omit<WorkoutType, 'id'>>) => {
+  const updateWorkoutType = async (id: string, typeData: Partial<Omit<WorkoutType, 'id'>>) => {
     setIsLoading(true);
     
     try {
@@ -658,7 +658,7 @@ export const useFitLog = () => {
       if (error) throw error;
 
       // Se foram fornecidos exercícios, salvar no banco
-      if (typeData.exercises) {
+      if (typeData.exercises !== undefined) {
         console.log('💾 Salvando exercícios para o tipo:', typeData.exercises);
         
         // Deletar exercícios antigos deste tipo
@@ -674,28 +674,33 @@ export const useFitLog = () => {
 
         // Inserir novos exercícios
         if (typeData.exercises.length > 0) {
-          const exercisesToInsert = typeData.exercises.map((ex, index) => ({
-            workout_type_id: id,
-            name: ex.name,
-            sets: ex.sets,
-            reps: ex.reps,
-            weight: ex.weight || null,
-            notes: ex.notes || null,
-            exercise_order: ex.order ?? index,
-          }));
+          const exercisesToInsert = typeData.exercises
+            .filter(ex => ex.name && ex.name.trim()) // Apenas exercícios com nome
+            .map((ex, index) => ({
+              workout_type_id: id,
+              workout_id: null as any, // Exercícios de tipo não têm workout_id
+              name: ex.name,
+              sets: ex.sets || 3,
+              reps: ex.reps || '10-12',
+              weight: ex.weight || null,
+              notes: ex.notes || null,
+              exercise_order: ex.order ?? index,
+            }));
 
-          console.log('📝 Inserindo exercícios no banco:', exercisesToInsert);
+          if (exercisesToInsert.length > 0) {
+            console.log('📝 Inserindo exercícios no banco:', exercisesToInsert);
 
-          const { error: insertError } = await supabase
-            .from('workout_exercises')
-            .insert(exercisesToInsert);
+            const { error: insertError } = await supabase
+              .from('workout_exercises')
+              .insert(exercisesToInsert);
 
-          if (insertError) {
-            console.error('❌ Erro ao inserir exercícios:', insertError);
-            throw insertError;
+            if (insertError) {
+              console.error('❌ Erro ao inserir exercícios:', insertError);
+              throw insertError;
+            }
+
+            console.log('✅ Exercícios salvos com sucesso!');
           }
-
-          console.log('✅ Exercícios salvos com sucesso!');
         }
       }
 
@@ -718,7 +723,9 @@ export const useFitLog = () => {
       setIsLoading(false);
       throw error;
     }
-  }, [toast]);
+  };
+
+  // Remover tipo de treino
 
   // Remover tipo de treino
   const removeWorkoutType = useCallback(async (id: string) => {
