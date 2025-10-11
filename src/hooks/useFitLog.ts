@@ -4,6 +4,12 @@ import { formatInTimeZone } from 'date-fns-tz';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+// Helper para interpretar datas do banco no timezone de São Paulo
+const parseDateInSaoPauloTimezone = (dateString: string): Date => {
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day, 12, 0, 0); // Meio-dia para evitar problemas de DST
+};
+
 export interface Exercise {
   id?: string;
   name: string;
@@ -95,7 +101,7 @@ export const useFitLog = () => {
 
       const workoutsData = (data || []).map(workout => ({
         id: workout.id,
-        date: new Date(workout.date),
+        date: parseDateInSaoPauloTimezone(workout.date),
         typeId: workout.type_id,
         customType: workout.custom_type || undefined,
         notes: workout.notes || undefined,
@@ -127,8 +133,14 @@ export const useFitLog = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      // Formatar data no timezone de São Paulo
-      const dateStr = formatInTimeZone(workoutData.date, 'America/Sao_Paulo', 'yyyy-MM-dd');
+      // Normalizar a data para meio-dia antes de formatar (evita problemas de DST)
+      const normalizedDate = new Date(
+        workoutData.date.getFullYear(),
+        workoutData.date.getMonth(),
+        workoutData.date.getDate(),
+        12, 0, 0
+      );
+      const dateStr = formatInTimeZone(normalizedDate, 'America/Sao_Paulo', 'yyyy-MM-dd');
 
       // Verificar diretamente no banco se já existe treino nesta data
       const { data: existingWorkouts, error: checkError } = await supabase
@@ -162,7 +174,7 @@ export const useFitLog = () => {
 
         const updated: Workout = {
           id: data.id,
-          date: new Date(data.date),
+          date: parseDateInSaoPauloTimezone(data.date),
           typeId: data.type_id,
           customType: data.custom_type || undefined,
           notes: data.notes || undefined,
@@ -202,7 +214,7 @@ export const useFitLog = () => {
 
         const newWorkout: Workout = {
           id: data.id,
-          date: new Date(data.date),
+          date: parseDateInSaoPauloTimezone(data.date),
           typeId: data.type_id,
           customType: data.custom_type || undefined,
           notes: data.notes || undefined,
@@ -246,8 +258,14 @@ export const useFitLog = () => {
       if (workoutData.customType !== undefined) updateData.custom_type = workoutData.customType || null;
       if (workoutData.notes !== undefined) updateData.notes = workoutData.notes || null;
       if (workoutData.date) {
-        // Formatar data no timezone de São Paulo
-        updateData.date = formatInTimeZone(workoutData.date, 'America/Sao_Paulo', 'yyyy-MM-dd');
+        // Normalizar a data para meio-dia antes de formatar (evita problemas de DST)
+        const normalizedDate = new Date(
+          workoutData.date.getFullYear(),
+          workoutData.date.getMonth(),
+          workoutData.date.getDate(),
+          12, 0, 0
+        );
+        updateData.date = formatInTimeZone(normalizedDate, 'America/Sao_Paulo', 'yyyy-MM-dd');
       }
 
       const { error } = await supabase
