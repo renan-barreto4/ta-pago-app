@@ -63,26 +63,65 @@ export const useFitLog = () => {
   const loadWorkoutTypes = async () => {
     try {
       console.log('🔍 Carregando tipos de treino...');
-      const { data, error } = await supabase
+      
+      // Carregar tipos
+      const typesQuery = supabase
         .from('workout_types')
         .select('*')
         .order('name');
+      
+      const { data: typesData, error: typesError } = await typesQuery;
 
-      console.log('📊 Resultado da query:', { data, error });
+      console.log('📊 Resultado da query de tipos:', { data: typesData, error: typesError });
 
-      if (error) {
-        console.error('❌ Erro na query:', error);
-        throw error;
+      if (typesError) {
+        console.error('❌ Erro na query:', typesError);
+        throw typesError;
       }
 
-      const types = (data || []).map(type => ({
+      // Carregar todos os exercícios de uma vez
+      const exercisesQuery = supabase
+        .from('workout_exercises')
+        .select('id, workout_type_id, name, sets, reps, weight, notes, exercise_order')
+        .order('exercise_order', { ascending: true });
+      
+      const { data: allExercisesData, error: allExercisesError } = await exercisesQuery;
+
+      if (allExercisesError) {
+        console.error('❌ Erro ao carregar exercícios:', allExercisesError);
+      }
+
+      // Agrupar exercícios por tipo
+      const exercisesByType: Record<string, Exercise[]> = {};
+      
+      if (allExercisesData) {
+        for (const ex of allExercisesData as any[]) {
+          const typeId = ex.workout_type_id as string;
+          if (!exercisesByType[typeId]) {
+            exercisesByType[typeId] = [];
+          }
+          exercisesByType[typeId].push({
+            id: ex.id,
+            name: ex.name,
+            sets: ex.sets,
+            reps: ex.reps,
+            weight: ex.weight ?? undefined,
+            notes: ex.notes ?? undefined,
+            order: ex.exercise_order,
+          });
+        }
+      }
+
+      // Montar tipos com seus exercícios
+      const types: WorkoutType[] = (typesData || []).map(type => ({
         id: type.id,
         name: type.name,
         icon: type.icon,
         color: type.color,
+        exercises: exercisesByType[type.id] || [],
       }));
 
-      console.log('✅ Tipos de treino carregados:', types);
+      console.log('✅ Tipos de treino carregados com exercícios:', types);
       setWorkoutTypes(types);
     } catch (error) {
       console.error('❌ Erro ao carregar tipos de treino:', error);
