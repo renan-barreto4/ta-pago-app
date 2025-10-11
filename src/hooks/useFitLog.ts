@@ -678,12 +678,11 @@ export const useFitLog = () => {
             .filter(ex => ex.name && ex.name.trim()) // Apenas exercícios com nome
             .map((ex, index) => ({
               workout_type_id: id,
-              workout_id: null as any, // Exercícios de tipo não têm workout_id
               name: ex.name,
               sets: ex.sets || 3,
               reps: ex.reps || '10-12',
-              weight: ex.weight || null,
-              notes: ex.notes || null,
+              weight: ex.weight,
+              notes: ex.notes,
               exercise_order: ex.order ?? index,
             }));
 
@@ -692,7 +691,7 @@ export const useFitLog = () => {
 
             const { error: insertError } = await supabase
               .from('workout_exercises')
-              .insert(exercisesToInsert);
+              .insert(exercisesToInsert as any);
 
             if (insertError) {
               console.error('❌ Erro ao inserir exercícios:', insertError);
