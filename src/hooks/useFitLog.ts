@@ -670,11 +670,18 @@ export const useFitLog = () => {
   // Salvar exercícios de um treino
   const saveWorkoutExercises = async (workoutId: string, exercises: Exercise[]) => {
     try {
+      console.log('💾 Salvando exercícios para workout:', workoutId, exercises);
+      
       // Deletar exercícios antigos
-      await supabase
+      const { error: deleteError } = await supabase
         .from('workout_exercises')
         .delete()
         .eq('workout_id', workoutId);
+      
+      if (deleteError) {
+        console.error('❌ Erro ao deletar exercícios antigos:', deleteError);
+        throw deleteError;
+      }
 
       // Inserir novos exercícios
       if (exercises.length > 0) {
@@ -688,14 +695,23 @@ export const useFitLog = () => {
           exercise_order: ex.order ?? index,
         }));
 
-        const { error } = await supabase
+        console.log('📝 Inserindo exercícios:', exercisesToInsert);
+
+        const { error: insertError } = await supabase
           .from('workout_exercises')
           .insert(exercisesToInsert);
 
-        if (error) throw error;
+        if (insertError) {
+          console.error('❌ Erro ao inserir exercícios:', insertError);
+          throw insertError;
+        }
+        
+        console.log('✅ Exercícios salvos com sucesso!');
+      } else {
+        console.log('ℹ️ Nenhum exercício para salvar');
       }
     } catch (error) {
-      console.error('Erro ao salvar exercícios:', error);
+      console.error('💥 Erro ao salvar exercícios:', error);
       throw error;
     }
   };

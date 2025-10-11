@@ -83,6 +83,8 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
       return;
     }
 
+    console.log('💪 Salvando treino com exercícios:', exercises);
+    
     setIsLoading(true);
 
     try {
@@ -107,7 +109,13 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
 
       onClose();
     } catch (error) {
-      console.error('Erro ao salvar treino:', error);
+      console.error('❌ Erro ao salvar treino:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao salvar exercícios",
+        description: "Houve um problema ao salvar os exercícios do treino",
+        duration: 4000,
+      });
     } finally {
       setIsLoading(false);
     }
