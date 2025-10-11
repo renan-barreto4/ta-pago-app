@@ -71,7 +71,6 @@ const Index = () => {
         {activeTab === 'calendar' && (
           <div className="space-y-6">
             <WorkoutCalendar 
-              onDateSelect={handleDateSelect}
               selectedDate={selectedDate}
             />
           </div>
