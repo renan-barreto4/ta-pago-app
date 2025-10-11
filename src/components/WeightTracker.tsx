@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useWeightTracker } from '@/hooks/useWeightTracker';
+import { useWeightContext } from '@/contexts/WeightContext';
 import { cn } from '@/lib/utils';
 
 const WeightTracker = () => {
@@ -20,7 +20,7 @@ const WeightTracker = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d' | '1y' | 'all'>('30d');
   const [currentWeight, setCurrentWeight] = useState(70);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const { weightEntries, addWeightEntry, updateWeightEntry, getFilteredEntries } = useWeightTracker();
+  const { weightEntries, addWeightEntry, updateWeightEntry, getFilteredEntries } = useWeightContext();
   
   const filteredData = getFilteredEntries(selectedPeriod);
 
