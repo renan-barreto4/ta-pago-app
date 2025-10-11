@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 
 export interface WeightEntry {
   id: string;
@@ -33,7 +33,7 @@ export const useWeightTracker = () => {
       const entries = (data || []).map(entry => ({
         id: entry.id,
         weight: Number(entry.weight),
-        date: new Date(entry.date),
+        date: parse(entry.date, 'yyyy-MM-dd', new Date()),
         createdAt: new Date(entry.created_at),
       }));
 
@@ -70,7 +70,7 @@ export const useWeightTracker = () => {
       const newEntry: WeightEntry = {
         id: data.id,
         weight: Number(data.weight),
-        date: new Date(data.date),
+        date: parse(data.date, 'yyyy-MM-dd', new Date()),
         createdAt: new Date(data.created_at),
       };
 
