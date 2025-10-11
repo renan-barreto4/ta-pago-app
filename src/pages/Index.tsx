@@ -5,7 +5,7 @@ import { WorkoutModal } from '@/components/WorkoutModal';
 import { StatsCards } from '@/components/StatsCards';
 import { WorkoutTypes } from '@/components/WorkoutTypes';
 import WeightTracker from '@/components/WeightTracker';
-import { useFitLog } from '@/hooks/useFitLog';
+import { useFitLogContext } from '@/contexts/FitLogContext';
 import { cn } from '@/lib/utils';
 import { UserMenu } from '@/components/UserMenu';
 
@@ -17,7 +17,7 @@ const Index = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingWorkout, setEditingWorkout] = useState<any>(null);
   
-  const { getWorkoutByDate } = useFitLog();
+  const { getWorkoutByDate } = useFitLogContext();
 
   const handleDateSelect = (date: Date) => {
     console.log('📅 Data selecionada:', date);
