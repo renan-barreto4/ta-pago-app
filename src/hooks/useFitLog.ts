@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, isSameDay } from 'date-fns';
-import { formatInTimeZone } from 'date-fns-tz';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -161,8 +160,12 @@ export const useFitLog = () => {
         setIsLoading(false);
         return updated;
       } else {
-        // Criar novo treino
-        const dateStr = formatInTimeZone(workoutData.date, 'America/Sao_Paulo', 'yyyy-MM-dd');
+        // Criar novo treino - usar componentes locais da data para evitar problemas de timezone
+        const year = workoutData.date.getFullYear();
+        const month = String(workoutData.date.getMonth() + 1).padStart(2, '0');
+        const day = String(workoutData.date.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+        
         const { data, error } = await supabase
           .from('workouts')
           .insert({
@@ -218,7 +221,12 @@ export const useFitLog = () => {
       if (workoutData.typeId) updateData.type_id = workoutData.typeId;
       if (workoutData.customType !== undefined) updateData.custom_type = workoutData.customType || null;
       if (workoutData.notes !== undefined) updateData.notes = workoutData.notes || null;
-      if (workoutData.date) updateData.date = formatInTimeZone(workoutData.date, 'America/Sao_Paulo', 'yyyy-MM-dd');
+      if (workoutData.date) {
+        const year = workoutData.date.getFullYear();
+        const month = String(workoutData.date.getMonth() + 1).padStart(2, '0');
+        const day = String(workoutData.date.getDate()).padStart(2, '0');
+        updateData.date = `${year}-${month}-${day}`;
+      }
 
       const { error } = await supabase
         .from('workouts')
