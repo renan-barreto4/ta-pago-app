@@ -8,10 +8,11 @@ import { useFitLogContext } from '@/contexts/FitLogContext';
 import { cn } from '@/lib/utils';
 
 interface WorkoutCalendarProps {
+  onDateSelect: (date: Date) => void;
   selectedDate?: Date;
 }
 
-export const WorkoutCalendar = ({ selectedDate }: WorkoutCalendarProps) => {
+export const WorkoutCalendar = ({ onDateSelect, selectedDate }: WorkoutCalendarProps) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const { getWorkoutByDate, workoutTypes, workouts } = useFitLogContext();
 
@@ -114,8 +115,9 @@ export const WorkoutCalendar = ({ selectedDate }: WorkoutCalendarProps) => {
           const isCurrentMonth = isSameMonth(day, currentMonth);
           
           return (
-            <div
+            <button
               key={day.toISOString()}
+              onClick={() => onDateSelect(day)}
               className={cn(
                 "relative h-12 w-full rounded-lg text-sm font-medium transition-all duration-200",
                 "hover:scale-105 hover:shadow-md",
@@ -155,7 +157,7 @@ export const WorkoutCalendar = ({ selectedDate }: WorkoutCalendarProps) => {
               {isToday(day) && !dayStatus.hasWorkout && (
                 <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-current rounded-full" />
               )}
-            </div>
+            </button>
           );
         })}
       </div>

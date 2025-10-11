@@ -148,7 +148,7 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
         />
       
       {/* Modal */}
-      <Card className="relative z-10 w-full max-w-md mx-4 p-6 bg-card shadow-modal animate-scale-in max-h-[90vh] overflow-y-auto">
+      <Card className="relative z-10 w-full max-w-md mx-4 p-6 bg-card shadow-modal animate-scale-in">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-foreground">
