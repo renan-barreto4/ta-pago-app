@@ -40,3 +40,7 @@
 .read-the-docs {
   color: #888;
 }
+
+.backdrop-blur-sm {
+  top: -12px;
+}
