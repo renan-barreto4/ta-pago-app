@@ -4,7 +4,7 @@ import { ptBR } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { useFitLog } from '@/hooks/useFitLog';
+import { useFitLogContext } from '@/contexts/FitLogContext';
 import { cn } from '@/lib/utils';
 
 interface WorkoutCalendarProps {
@@ -14,7 +14,7 @@ interface WorkoutCalendarProps {
 
 export const WorkoutCalendar = ({ onDateSelect, selectedDate }: WorkoutCalendarProps) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const { getWorkoutByDate, workoutTypes } = useFitLog();
+  const { getWorkoutByDate, workoutTypes, workouts } = useFitLogContext();
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
