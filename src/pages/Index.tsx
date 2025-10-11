@@ -20,8 +20,10 @@ const Index = () => {
   const { getWorkoutByDate } = useFitLog();
 
   const handleDateSelect = (date: Date) => {
+    console.log('📅 Data selecionada:', date);
     setSelectedDate(date);
     const existingWorkout = getWorkoutByDate(date);
+    console.log('🔍 Treino encontrado para esta data:', existingWorkout);
     setEditingWorkout(existingWorkout || null);
     setIsModalOpen(true);
   };
