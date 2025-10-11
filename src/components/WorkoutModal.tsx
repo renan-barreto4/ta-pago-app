@@ -21,9 +21,10 @@ interface WorkoutModalProps {
   onClose: () => void;
   selectedDate: Date;
   existingWorkout?: Workout | null;
+  showExercises?: boolean;
 }
 
-export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }: WorkoutModalProps) => {
+export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout, showExercises = true }: WorkoutModalProps) => {
   const [selectedType, setSelectedType] = useState<string>('');
   const [customType, setCustomType] = useState('');
   const [notes, setNotes] = useState('');
@@ -148,7 +149,7 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
         />
       
       {/* Modal */}
-      <Card className="relative z-10 w-full max-w-md mx-4 p-6 bg-card shadow-modal animate-scale-in">
+      <Card className="relative z-10 w-full max-w-md mx-4 p-6 bg-card shadow-modal animate-scale-in max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-foreground">
@@ -244,10 +245,12 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
           )}
 
           {/* Lista de exercícios */}
-          <ExerciseList 
-            exercises={exercises}
-            onChange={setExercises}
-          />
+          {showExercises && (
+            <ExerciseList 
+              exercises={exercises}
+              onChange={setExercises}
+            />
+          )}
 
           {/* Observações */}
           <div>

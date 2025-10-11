@@ -112,6 +112,7 @@ const Index = () => {
         onClose={handleCloseModal}
         selectedDate={selectedDate || new Date()}
         existingWorkout={editingWorkout}
+        showExercises={false}
       />
     </div>
 
