@@ -123,8 +123,6 @@ export const WorkoutTypes = () => {
         duration: 3000,
       });
       handleCloseModal();
-      // Forçar recarregamento da página para atualizar a lista
-      window.location.reload();
     } catch (error) {
       toast({
         variant: "destructive",
