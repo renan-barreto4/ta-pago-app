@@ -73,7 +73,8 @@ export const WorkoutTypes = () => {
       id: Date.now().toString(),
       name: '',
       sets: 3,
-      reps: '10-12'
+      reps: '10-12',
+      order: formData.exercises.length
     };
     setFormData(prev => ({
       ...prev,

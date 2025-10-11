@@ -4,10 +4,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export interface Exercise {
-  id: string;
+  id?: string;
   name: string;
   sets: number;
   reps: string;
+  weight?: number;
+  notes?: string;
+  order: number;
 }
 
 export interface WorkoutType {
@@ -113,7 +116,10 @@ export const useFitLog = () => {
   };
 
   // Salvar treino
-  const saveWorkout = useCallback(async (workoutData: Omit<Workout, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const saveWorkout = useCallback(async (
+    workoutData: Omit<Workout, 'id' | 'createdAt' | 'updatedAt'>,
+    exercises: Exercise[] = []
+  ) => {
     setIsLoading(true);
     
     try {
@@ -153,6 +159,9 @@ export const useFitLog = () => {
 
         if (error) throw error;
 
+        // Salvar exercícios
+        await saveWorkoutExercises(existingWorkouts.id, exercises);
+
         const updated: Workout = {
           id: data.id,
           date: new Date(data.date),
@@ -190,6 +199,9 @@ export const useFitLog = () => {
 
         if (error) throw error;
 
+        // Salvar exercícios
+        await saveWorkoutExercises(data.id, exercises);
+
         const newWorkout: Workout = {
           id: data.id,
           date: new Date(data.date),
@@ -223,7 +235,11 @@ export const useFitLog = () => {
   }, [workouts, toast]);
 
   // Atualizar treino
-  const updateWorkout = useCallback(async (id: string, workoutData: Partial<Omit<Workout, 'id' | 'createdAt'>>) => {
+  const updateWorkout = useCallback(async (
+    id: string, 
+    workoutData: Partial<Omit<Workout, 'id' | 'createdAt'>>,
+    exercises: Exercise[] = []
+  ) => {
     setIsLoading(true);
     
     try {
@@ -244,6 +260,9 @@ export const useFitLog = () => {
         .eq('id', id);
 
       if (error) throw error;
+
+      // Salvar exercícios
+      await saveWorkoutExercises(id, exercises);
 
       setWorkouts(prev => prev.map(workout => 
         workout.id === id 
@@ -634,6 +653,65 @@ export const useFitLog = () => {
     }
   }, [toast]);
 
+  // Salvar exercícios de um treino
+  const saveWorkoutExercises = async (workoutId: string, exercises: Exercise[]) => {
+    try {
+      // Deletar exercícios antigos
+      await supabase
+        .from('workout_exercises')
+        .delete()
+        .eq('workout_id', workoutId);
+
+      // Inserir novos exercícios
+      if (exercises.length > 0) {
+        const exercisesToInsert = exercises.map((ex, index) => ({
+          workout_id: workoutId,
+          name: ex.name,
+          sets: ex.sets,
+          reps: ex.reps,
+          weight: ex.weight || null,
+          notes: ex.notes || null,
+          exercise_order: ex.order ?? index,
+        }));
+
+        const { error } = await supabase
+          .from('workout_exercises')
+          .insert(exercisesToInsert);
+
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error('Erro ao salvar exercícios:', error);
+      throw error;
+    }
+  };
+
+  // Carregar exercícios de um treino
+  const loadWorkoutExercises = useCallback(async (workoutId: string): Promise<Exercise[]> => {
+    try {
+      const { data, error } = await supabase
+        .from('workout_exercises')
+        .select('*')
+        .eq('workout_id', workoutId)
+        .order('exercise_order', { ascending: true });
+
+      if (error) throw error;
+
+      return (data || []).map(ex => ({
+        id: ex.id,
+        name: ex.name,
+        sets: ex.sets,
+        reps: ex.reps,
+        weight: ex.weight || undefined,
+        notes: ex.notes || undefined,
+        order: ex.exercise_order,
+      }));
+    } catch (error) {
+      console.error('Erro ao carregar exercícios:', error);
+      return [];
+    }
+  }, []);
+
   return {
     // Estado
     workouts,
@@ -649,6 +727,9 @@ export const useFitLog = () => {
     addWorkoutType,
     updateWorkoutType,
     removeWorkoutType,
+    
+    // Ações para exercícios
+    loadWorkoutExercises,
     
     // Consultas
     getWorkoutByDate,

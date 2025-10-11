@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ProgressToast } from '@/components/ui/progress-toast';
 import { useFitLog, WorkoutType, Workout } from '@/hooks/useFitLog';
 import { cn } from '@/lib/utils';
+import { ExerciseList, Exercise } from '@/components/ExerciseList';
 
 interface WorkoutModalProps {
   isOpen: boolean;
@@ -28,8 +29,9 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
   const [workoutDate, setWorkoutDate] = useState<Date>(selectedDate || new Date());
   const [isLoading, setIsLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
   
-  const { workoutTypes, saveWorkout, updateWorkout, deleteWorkout } = useFitLog();
+  const { workoutTypes, saveWorkout, updateWorkout, deleteWorkout, loadWorkoutExercises } = useFitLog();
   const { toast } = useToast();
 
   // Resetar formulário quando modal abre/fecha
@@ -46,13 +48,16 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
         setSelectedType(existingWorkout.typeId);
         setCustomType(existingWorkout.customType || '');
         setNotes(existingWorkout.notes || '');
+        // Carregar exercícios do treino existente
+        loadWorkoutExercises(existingWorkout.id).then(setExercises);
       } else {
         setSelectedType('');
         setCustomType('');
         setNotes('');
+        setExercises([]);
       }
     }
-  }, [isOpen, existingWorkout, selectedDate]);
+  }, [isOpen, existingWorkout, selectedDate, loadWorkoutExercises]);
 
   const handleSave = async () => {
     if (!selectedType) {
@@ -88,9 +93,9 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
       };
 
       if (existingWorkout) {
-        await updateWorkout(existingWorkout.id, workoutData);
+        await updateWorkout(existingWorkout.id, workoutData, exercises);
       } else {
-        await saveWorkout(workoutData);
+        await saveWorkout(workoutData, exercises);
         toast({
           title: "Treino registrado!",
           description: "Parabéns por manter a consistência",
@@ -228,6 +233,12 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
               />
             </div>
           )}
+
+          {/* Lista de exercícios */}
+          <ExerciseList 
+            exercises={exercises}
+            onChange={setExercises}
+          />
 
           {/* Observações */}
           <div>

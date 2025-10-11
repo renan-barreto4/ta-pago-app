@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Calendar, Edit3, Trash2, Search } from 'lucide-react';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { useFitLog } from '@/hooks/useFitLog';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { ExerciseList, Exercise } from '@/components/ExerciseList';
 
 interface WorkoutHistoryProps {
   onEditWorkout: (workout: any) => void;
@@ -15,8 +16,27 @@ interface WorkoutHistoryProps {
 
 export const WorkoutHistory = ({ onEditWorkout }: WorkoutHistoryProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { workouts, workoutTypes, deleteWorkout } = useFitLog();
+  const [exercisesByWorkout, setExercisesByWorkout] = useState<Record<string, Exercise[]>>({});
+  const { workouts, workoutTypes, deleteWorkout, loadWorkoutExercises } = useFitLog();
   const { toast } = useToast();
+
+  // Carregar exercícios para cada treino
+  useEffect(() => {
+    const loadAllExercises = async () => {
+      const exercisesMap: Record<string, Exercise[]> = {};
+      for (const workout of workouts) {
+        const exercises = await loadWorkoutExercises(workout.id);
+        if (exercises.length > 0) {
+          exercisesMap[workout.id] = exercises;
+        }
+      }
+      setExercisesByWorkout(exercisesMap);
+    };
+
+    if (workouts.length > 0) {
+      loadAllExercises();
+    }
+  }, [workouts, loadWorkoutExercises]);
 
   // Filtrar e ordenar treinos
   const filteredWorkouts = workouts
@@ -143,6 +163,17 @@ export const WorkoutHistory = ({ onEditWorkout }: WorkoutHistoryProps) => {
                         <p className="text-sm text-foreground mt-2 p-2 bg-muted/50 rounded-md">
                           {workout.notes}
                         </p>
+                      )}
+
+                      {/* Mostrar exercícios */}
+                      {exercisesByWorkout[workout.id] && exercisesByWorkout[workout.id].length > 0 && (
+                        <div className="mt-3">
+                          <ExerciseList 
+                            exercises={exercisesByWorkout[workout.id]}
+                            onChange={() => {}}
+                            readOnly
+                          />
+                        </div>
                       )}
                     </div>
                   </div>

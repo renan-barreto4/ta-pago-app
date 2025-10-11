@@ -62,6 +62,53 @@ export type Database = {
         }
         Relationships: []
       }
+      workout_exercises: {
+        Row: {
+          created_at: string
+          exercise_order: number
+          id: string
+          name: string
+          notes: string | null
+          reps: string
+          sets: number
+          updated_at: string
+          weight: number | null
+          workout_id: string
+        }
+        Insert: {
+          created_at?: string
+          exercise_order?: number
+          id?: string
+          name: string
+          notes?: string | null
+          reps: string
+          sets?: number
+          updated_at?: string
+          weight?: number | null
+          workout_id: string
+        }
+        Update: {
+          created_at?: string
+          exercise_order?: number
+          id?: string
+          name?: string
+          notes?: string | null
+          reps?: string
+          sets?: number
+          updated_at?: string
+          weight?: number | null
+          workout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_exercises_workout_id_fkey"
+            columns: ["workout_id"]
+            isOneToOne: false
+            referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workout_types: {
         Row: {
           color: string
