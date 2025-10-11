@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Calendar, TrendingUp, Scale, Dumbbell } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Calendar, TrendingUp, Scale, Dumbbell, LogOut } from 'lucide-react';
 import { WorkoutCalendar } from '@/components/WorkoutCalendar';
 import { WorkoutModal } from '@/components/WorkoutModal';
 import { StatsCards } from '@/components/StatsCards';
@@ -7,16 +8,38 @@ import { WorkoutTypes } from '@/components/WorkoutTypes';
 import WeightTracker from '@/components/WeightTracker';
 import { useFitLog } from '@/hooks/useFitLog';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 type ActiveTab = 'calendar' | 'stats' | 'weight' | 'types';
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<ActiveTab>('calendar');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingWorkout, setEditingWorkout] = useState<any>(null);
   
   const { getWorkoutByDate } = useFitLog();
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: 'Até logo!',
+        description: 'Você foi desconectado com sucesso.',
+      });
+      navigate('/auth');
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível sair.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
@@ -58,7 +81,14 @@ const Index = () => {
                 <h1 className="text-xl font-bold text-foreground">Tá Pago</h1>
               </div>
             </div>
-            
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              title="Sair"
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
           </div>
         </div>
       </header>
