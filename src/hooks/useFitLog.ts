@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval, isSameDay } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -126,11 +127,8 @@ export const useFitLog = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      // Formatar data como string yyyy-MM-dd
-      const year = workoutData.date.getFullYear();
-      const month = String(workoutData.date.getMonth() + 1).padStart(2, '0');
-      const day = String(workoutData.date.getDate()).padStart(2, '0');
-      const dateStr = `${year}-${month}-${day}`;
+      // Formatar data no timezone de São Paulo
+      const dateStr = formatInTimeZone(workoutData.date, 'America/Sao_Paulo', 'yyyy-MM-dd');
 
       // Verificar diretamente no banco se já existe treino nesta data
       const { data: existingWorkouts, error: checkError } = await supabase
@@ -248,10 +246,8 @@ export const useFitLog = () => {
       if (workoutData.customType !== undefined) updateData.custom_type = workoutData.customType || null;
       if (workoutData.notes !== undefined) updateData.notes = workoutData.notes || null;
       if (workoutData.date) {
-        const year = workoutData.date.getFullYear();
-        const month = String(workoutData.date.getMonth() + 1).padStart(2, '0');
-        const day = String(workoutData.date.getDate()).padStart(2, '0');
-        updateData.date = `${year}-${month}-${day}`;
+        // Formatar data no timezone de São Paulo
+        updateData.date = formatInTimeZone(workoutData.date, 'America/Sao_Paulo', 'yyyy-MM-dd');
       }
 
       const { error } = await supabase
