@@ -143,11 +143,15 @@ export const WorkoutTypes = () => {
 
       {/* Modal de edição */}
       {isModalOpen && (
-        <>
-          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={handleCloseModal} />
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Modal */}
-            <Card className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-card shadow-modal animate-scale-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm" 
+            onClick={handleCloseModal} 
+          />
+          
+          {/* Modal */}
+          <Card className="relative z-10 w-full max-w-lg max-h-[90vh] overflow-y-auto bg-card shadow-modal animate-scale-in">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                 <CardTitle className="text-lg font-semibold text-foreground">
                   Editar Treino
@@ -309,8 +313,7 @@ export const WorkoutTypes = () => {
                 </form>
               </CardContent>
             </Card>
-          </div>
-        </>
+        </div>
       )}
 
       {/* Lista de tipos de treino */}
