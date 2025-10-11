@@ -87,6 +87,8 @@ export const useFitLog = () => {
       
       const { data: allExercisesData, error: allExercisesError } = await exercisesQuery;
 
+      console.log('📋 Exercícios carregados do banco:', allExercisesData);
+
       if (allExercisesError) {
         console.error('❌ Erro ao carregar exercícios:', allExercisesError);
       }
@@ -97,6 +99,7 @@ export const useFitLog = () => {
       if (allExercisesData) {
         for (const ex of allExercisesData as any[]) {
           const typeId = ex.workout_type_id as string;
+          console.log(`🔗 Vinculando exercício "${ex.name}" ao tipo ${typeId}`);
           if (!exercisesByType[typeId]) {
             exercisesByType[typeId] = [];
           }
@@ -111,6 +114,8 @@ export const useFitLog = () => {
           });
         }
       }
+
+      console.log('📦 Exercícios agrupados por tipo:', exercisesByType);
 
       // Montar tipos com seus exercícios
       const types: WorkoutType[] = (typesData || []).map(type => ({
