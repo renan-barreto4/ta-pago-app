@@ -29,6 +29,18 @@ model WorkoutType {
   workoutLogs WorkoutLog[]
 }
 
+model workout_exercises {
+  id              String        @id @default(uuid())
+  workout_type_id String        @id
+  name            String
+  sets            Int
+  reps            String
+  
+  workout_type    workout_types @relation(fields: [workout_type_id], references: [id], onDelete: Cascade)
+
+  @@map("workout_exercises")
+}
+
 model WorkoutLog {
   id         String   @id @default(uuid())
   date       DateTime
