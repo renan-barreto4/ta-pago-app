@@ -643,6 +643,8 @@ export const useFitLog = () => {
     setIsLoading(true);
     
     try {
+      console.log('🔄 Atualizando tipo de treino:', id, typeData);
+      
       const updateData: any = {};
       if (typeData.name) updateData.name = typeData.name;
       if (typeData.icon) updateData.icon = typeData.icon;
@@ -655,15 +657,54 @@ export const useFitLog = () => {
 
       if (error) throw error;
 
-      setWorkoutTypes(prev => prev.map(type => 
-        type.id === id 
-          ? { ...type, ...typeData }
-          : type
-      ));
+      // Se foram fornecidos exercícios, salvar no banco
+      if (typeData.exercises) {
+        console.log('💾 Salvando exercícios para o tipo:', typeData.exercises);
+        
+        // Deletar exercícios antigos deste tipo
+        const { error: deleteError } = await supabase
+          .from('workout_exercises')
+          .delete()
+          .eq('workout_type_id', id);
+
+        if (deleteError) {
+          console.error('❌ Erro ao deletar exercícios antigos:', deleteError);
+          throw deleteError;
+        }
+
+        // Inserir novos exercícios
+        if (typeData.exercises.length > 0) {
+          const exercisesToInsert = typeData.exercises.map((ex, index) => ({
+            workout_type_id: id,
+            name: ex.name,
+            sets: ex.sets,
+            reps: ex.reps,
+            weight: ex.weight || null,
+            notes: ex.notes || null,
+            exercise_order: ex.order ?? index,
+          }));
+
+          console.log('📝 Inserindo exercícios no banco:', exercisesToInsert);
+
+          const { error: insertError } = await supabase
+            .from('workout_exercises')
+            .insert(exercisesToInsert);
+
+          if (insertError) {
+            console.error('❌ Erro ao inserir exercícios:', insertError);
+            throw insertError;
+          }
+
+          console.log('✅ Exercícios salvos com sucesso!');
+        }
+      }
+
+      // Recarregar tipos para pegar os exercícios atualizados
+      await loadWorkoutTypes();
 
       toast({
         title: 'Tipo atualizado',
-        description: 'Tipo de treino atualizado com sucesso.',
+        description: 'Tipo de treino e exercícios atualizados com sucesso.',
       });
 
       setIsLoading(false);
