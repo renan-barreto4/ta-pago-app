@@ -120,10 +120,25 @@ export const useFitLog = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      // Verificar se já existe treino na mesma data
-      const existingWorkout = workouts.find(w => isSameDay(w.date, workoutData.date));
-      
-      if (existingWorkout) {
+      // Formatar data como string yyyy-MM-dd
+      const year = workoutData.date.getFullYear();
+      const month = String(workoutData.date.getMonth() + 1).padStart(2, '0');
+      const day = String(workoutData.date.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
+
+      // Verificar diretamente no banco se já existe treino nesta data
+      const { data: existingWorkouts, error: checkError } = await supabase
+        .from('workouts')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('date', dateStr)
+        .maybeSingle();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError;
+      }
+
+      if (existingWorkouts) {
         // Atualizar treino existente
         const { data, error } = await supabase
           .from('workouts')
@@ -132,7 +147,7 @@ export const useFitLog = () => {
             custom_type: workoutData.customType || null,
             notes: workoutData.notes || null,
           })
-          .eq('id', existingWorkout.id)
+          .eq('id', existingWorkouts.id)
           .select()
           .single();
 
@@ -149,7 +164,7 @@ export const useFitLog = () => {
         };
 
         setWorkouts(prev => prev.map(workout => 
-          workout.id === existingWorkout.id ? updated : workout
+          workout.id === existingWorkouts.id ? updated : workout
         ));
 
         toast({
@@ -160,12 +175,7 @@ export const useFitLog = () => {
         setIsLoading(false);
         return updated;
       } else {
-        // Criar novo treino - usar componentes locais da data para evitar problemas de timezone
-        const year = workoutData.date.getFullYear();
-        const month = String(workoutData.date.getMonth() + 1).padStart(2, '0');
-        const day = String(workoutData.date.getDate()).padStart(2, '0');
-        const dateStr = `${year}-${month}-${day}`;
-        
+        // Criar novo treino
         const { data, error } = await supabase
           .from('workouts')
           .insert({
