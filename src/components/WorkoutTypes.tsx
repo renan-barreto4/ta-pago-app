@@ -171,11 +171,7 @@ export const WorkoutTypes = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           {/* Overlay */}
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={handleCloseModal}
-            style="top: -24px;"
-          />
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleCloseModal} />
 
           {/* Modal */}
           <Card className="relative z-10 w-full max-w-lg max-h-[90vh] overflow-y-auto bg-card shadow-modal animate-scale-in">
