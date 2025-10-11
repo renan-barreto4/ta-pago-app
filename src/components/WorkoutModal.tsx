@@ -50,7 +50,8 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout, s
         setSelectedType(existingWorkout.typeId);
         setCustomType(existingWorkout.customType || '');
         setNotes(existingWorkout.notes || '');
-        // Carregar exercícios do treino existente
+        // SEMPRE carregar exercícios do treino existente, mesmo quando showExercises=false
+        // Isso garante que os exercícios serão mantidos ao editar o treino
         loadWorkoutExercises(existingWorkout.id).then(setExercises);
       } else {
         setSelectedType('');
@@ -96,8 +97,16 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout, s
         notes: notes.trim() || undefined,
       };
 
+      // SEMPRE passa os exercícios, mesmo quando showExercises=false
+      // Isso garante que exercícios existentes são mantidos ao editar pelo calendário
       if (existingWorkout) {
         await updateWorkout(existingWorkout.id, workoutData, exercises);
+        toast({
+          title: "Treino atualizado!",
+          description: "Suas alterações foram salvas",
+          className: "border-green-600 bg-green-50 text-green-900",
+          duration: 3000,
+        });
       } else {
         await saveWorkout(workoutData, exercises);
         toast({
@@ -113,8 +122,8 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout, s
       console.error('❌ Erro ao salvar treino:', error);
       toast({
         variant: "destructive",
-        title: "Erro ao salvar exercícios",
-        description: "Houve um problema ao salvar os exercícios do treino",
+        title: "Erro ao salvar treino",
+        description: "Houve um problema ao salvar o treino",
         duration: 4000,
       });
     } finally {
