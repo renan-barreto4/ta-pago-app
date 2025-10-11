@@ -11,7 +11,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
 import { ProgressToast } from '@/components/ui/progress-toast';
-import { useFitLog, WorkoutType, Workout } from '@/hooks/useFitLog';
+import { useFitLogContext } from '@/contexts/FitLogContext';
+import { Workout } from '@/hooks/useFitLog';
 import { cn } from '@/lib/utils';
 import { ExerciseList, Exercise } from '@/components/ExerciseList';
 
@@ -31,7 +32,7 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout }:
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   
-  const { workoutTypes, saveWorkout, updateWorkout, deleteWorkout, loadWorkoutExercises } = useFitLog();
+  const { workoutTypes, saveWorkout, updateWorkout, deleteWorkout, loadWorkoutExercises } = useFitLogContext();
   const { toast } = useToast();
 
   // Resetar formulário quando modal abre/fecha

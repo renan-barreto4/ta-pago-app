@@ -5,7 +5,7 @@ import { Calendar, Edit3, Trash2, Search } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useFitLog } from '@/hooks/useFitLog';
+import { useFitLogContext } from '@/contexts/FitLogContext';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { ExerciseList, Exercise } from '@/components/ExerciseList';
@@ -17,7 +17,7 @@ interface WorkoutHistoryProps {
 export const WorkoutHistory = ({ onEditWorkout }: WorkoutHistoryProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [exercisesByWorkout, setExercisesByWorkout] = useState<Record<string, Exercise[]>>({});
-  const { workouts, workoutTypes, deleteWorkout, loadWorkoutExercises } = useFitLog();
+  const { workouts, workoutTypes, deleteWorkout, loadWorkoutExercises } = useFitLogContext();
   const { toast } = useToast();
 
   // Carregar exercícios para cada treino

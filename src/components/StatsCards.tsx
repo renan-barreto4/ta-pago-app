@@ -4,7 +4,7 @@ import { format, addWeeks, subWeeks, addMonths, subMonths, addYears, subYears, s
 import { ptBR } from 'date-fns/locale';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useFitLog } from '@/hooks/useFitLog';
+import { useFitLogContext } from '@/contexts/FitLogContext';
 import { cn } from '@/lib/utils';
 
 type PeriodType = 'week' | 'month' | 'year';
@@ -13,7 +13,7 @@ export const StatsCards = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('week');
   const [currentDate, setCurrentDate] = useState(new Date());
   
-  const { getStats, getTypeDistribution, getWeekdayDistribution, getMonthDistribution } = useFitLog();
+  const { getStats, getTypeDistribution, getWeekdayDistribution, getMonthDistribution } = useFitLogContext();
 
   const stats = getStats(selectedPeriod, currentDate);
   const distribution = getTypeDistribution(selectedPeriod, currentDate);
