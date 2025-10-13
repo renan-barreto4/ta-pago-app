@@ -205,7 +205,7 @@ export const WorkoutTypes = () => {
                           {formData.icon}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-80 p-4" align="center">
+                      <PopoverContent className="w-80 p-4 z-[101]" align="center">
                         <div className="grid grid-cols-6 gap-2">
                           {EMOJI_OPTIONS.map((emoji) => (
                             <button
@@ -240,7 +240,7 @@ export const WorkoutTypes = () => {
                           />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-64 p-4" align="center">
+                      <PopoverContent className="w-64 p-4 z-[101]" align="center">
                         <div className="grid grid-cols-4 gap-2">
                           {COLOR_OPTIONS.map((color) => (
                             <button
