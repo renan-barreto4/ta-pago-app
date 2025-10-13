@@ -598,9 +598,13 @@ export const useFitLog = () => {
     setIsLoading(true);
     
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
       const { data, error } = await supabase
         .from('workout_types')
         .insert({
+          user_id: user.id,
           name: typeData.name,
           icon: typeData.icon,
           color: typeData.color,
