@@ -126,6 +126,7 @@ export type Database = {
           icon: string
           id: string
           name: string
+          order_index: number
           user_id: string
         }
         Insert: {
@@ -134,6 +135,7 @@ export type Database = {
           icon: string
           id?: string
           name: string
+          order_index?: number
           user_id: string
         }
         Update: {
@@ -142,6 +144,7 @@ export type Database = {
           icon?: string
           id?: string
           name?: string
+          order_index?: number
           user_id?: string
         }
         Relationships: []

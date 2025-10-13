@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Edit2, X, Plus, Trash2, AlertCircle } from "lucide-react";
+import { Edit2, X, Plus, Trash2, AlertCircle, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +8,23 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useFitLogContext } from "@/contexts/FitLogContext";
 import { useToast } from "@/hooks/use-toast";
 import type { Exercise } from "@/hooks/useFitLog";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const EMOJI_OPTIONS = [
   "🅰️",
@@ -56,12 +73,78 @@ const COLOR_OPTIONS = [
   "hsl(160 84% 39%)", // Verde água
 ];
 
+// Componente de card arrastável
+function SortableWorkoutCard({ type, onEdit }: { type: any; onEdit: (type: any) => void }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: type.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <Card ref={setNodeRef} style={style} className="shadow-workout">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <button
+              className="cursor-grab active:cursor-grabbing touch-none p-1 hover:bg-accent rounded"
+              {...attributes}
+              {...listeners}
+            >
+              <GripVertical className="h-4 w-4 text-muted-foreground" />
+            </button>
+            <span className="text-lg">{type.icon}</span>
+            <span className="font-medium">{type.name}</span>
+          </div>
+          <div className="flex gap-1">
+            <Button variant="ghost" size="sm" onClick={() => onEdit(type)} className="h-8 w-8 p-0">
+              <Edit2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="w-full h-3 rounded-full" style={{ backgroundColor: type.color }} />
+
+        {type.exercises && type.exercises.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-foreground">Exercícios:</h4>
+            <div className="space-y-1">
+              {type.exercises.map((exercise: any) => (
+                <div key={exercise.id} className="text-xs text-muted-foreground flex justify-between">
+                  <span>{exercise.name || "Sem nome"}</span>
+                  <span>
+                    {exercise.sets}x {exercise.reps}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export const WorkoutTypes = () => {
-  const { workoutTypes, updateWorkoutType } = useFitLogContext();
+  const { workoutTypes, updateWorkoutType, reorderWorkoutTypes } = useFitLogContext();
   const { toast } = useToast();
 
-  console.log("🎯 WorkoutTypes - workoutTypes:", workoutTypes);
-  console.log("🎯 WorkoutTypes - quantidade:", workoutTypes.length);
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingType, setEditingType] = useState<any>(null);
@@ -73,6 +156,35 @@ export const WorkoutTypes = () => {
   });
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = workoutTypes.findIndex((type) => type.id === active.id);
+      const newIndex = workoutTypes.findIndex((type) => type.id === over.id);
+
+      const reordered = arrayMove(workoutTypes, oldIndex, newIndex);
+      
+      try {
+        await reorderWorkoutTypes(reordered);
+        toast({
+          title: "Ordem atualizada!",
+          description: "A ordem dos tipos de treino foi salva.",
+          className: "border-green-600 bg-green-50 text-green-900",
+          duration: 2000,
+        });
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Não foi possível salvar a ordem.",
+          className: "border-red-600 bg-red-50 text-red-900",
+          duration: 3000,
+        });
+      }
+    }
+  };
 
   const handleOpenModal = (type: any) => {
     setEditingType(type);
@@ -164,7 +276,7 @@ export const WorkoutTypes = () => {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-foreground">Tipos de Treino</h2>
-        <p className="text-muted-foreground">Gerencie os tipos de treino disponíveis</p>
+        <p className="text-muted-foreground">Gerencie os tipos de treino disponíveis. Arraste para reordenar.</p>
       </div>
 
       {/* Modal de edição */}
@@ -278,7 +390,7 @@ export const WorkoutTypes = () => {
                           <Input
                             placeholder="Nome do exercício"
                             value={exercise.name}
-                            onChange={(e) => updateExercise(exercise.id, "name", e.target.value)}
+                            onChange={(e) => updateExercise(exercise.id!, "name", e.target.value)}
                             className="text-sm"
                           />
                           <div className="flex gap-2">
@@ -288,7 +400,7 @@ export const WorkoutTypes = () => {
                                 type="number"
                                 min="1"
                                 value={exercise.sets}
-                                onChange={(e) => updateExercise(exercise.id, "sets", parseInt(e.target.value) || 1)}
+                                onChange={(e) => updateExercise(exercise.id!, "sets", parseInt(e.target.value) || 1)}
                                 className="text-sm"
                               />
                             </div>
@@ -297,7 +409,7 @@ export const WorkoutTypes = () => {
                               <Input
                                 placeholder="10-12"
                                 value={exercise.reps}
-                                onChange={(e) => updateExercise(exercise.id, "reps", e.target.value)}
+                                onChange={(e) => updateExercise(exercise.id!, "reps", e.target.value)}
                                 className="text-sm"
                               />
                             </div>
@@ -307,7 +419,7 @@ export const WorkoutTypes = () => {
                           type="button"
                           variant="ghost"
                           size="sm"
-                          onClick={() => removeExercise(exercise.id)}
+                          onClick={() => removeExercise(exercise.id!)}
                           className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive mt-1"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -350,44 +462,19 @@ export const WorkoutTypes = () => {
             </div>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {workoutTypes.map((type) => (
-              <Card key={type.id} className="shadow-workout">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{type.icon}</span>
-                      <span className="font-medium">{type.name}</span>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="sm" onClick={() => handleOpenModal(type)} className="h-8 w-8 p-0">
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="w-full h-3 rounded-full" style={{ backgroundColor: type.color }} />
-
-                  {type.exercises && type.exercises.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium text-foreground">Exercícios:</h4>
-                      <div className="space-y-1">
-                        {type.exercises.map((exercise) => (
-                          <div key={exercise.id} className="text-xs text-muted-foreground flex justify-between">
-                            <span>{exercise.name || "Sem nome"}</span>
-                            <span>
-                              {exercise.sets}x {exercise.reps}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={workoutTypes.map(t => t.id)} strategy={verticalListSortingStrategy}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {workoutTypes.map((type) => (
+                  <SortableWorkoutCard key={type.id} type={type} onEdit={handleOpenModal} />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         )}
       </div>
     </div>

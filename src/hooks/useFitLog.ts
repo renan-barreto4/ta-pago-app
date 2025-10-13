@@ -68,7 +68,7 @@ export const useFitLog = () => {
       const typesQuery = supabase
         .from('workout_types')
         .select('*')
-        .order('name');
+        .order('order_index', { ascending: true });
       
       const { data: typesData, error: typesError } = await typesQuery;
 
@@ -837,6 +837,34 @@ export const useFitLog = () => {
     }
   }, []);
 
+  // Reordenar tipos de treino
+  const reorderWorkoutTypes = useCallback(async (reorderedTypes: WorkoutType[]) => {
+    try {
+      console.log('🔄 Reordenando tipos de treino:', reorderedTypes.map(t => t.name));
+      
+      // Atualizar ordem localmente primeiro para UI responsiva
+      setWorkoutTypes(reorderedTypes);
+      
+      // Preparar updates em batch
+      const updates = reorderedTypes.map((type, index) => 
+        supabase
+          .from('workout_types')
+          .update({ order_index: index })
+          .eq('id', type.id)
+      );
+      
+      // Executar todos os updates
+      await Promise.all(updates);
+      
+      console.log('✅ Ordem dos tipos atualizada com sucesso');
+    } catch (error) {
+      console.error('❌ Erro ao reordenar tipos:', error);
+      // Recarregar tipos em caso de erro
+      await loadWorkoutTypes();
+      throw error;
+    }
+  }, []);
+
   return {
     // Estado
     workouts,
@@ -852,6 +880,7 @@ export const useFitLog = () => {
     addWorkoutType,
     updateWorkoutType,
     removeWorkoutType,
+    reorderWorkoutTypes,
     
     // Ações para exercícios
     loadWorkoutExercises,

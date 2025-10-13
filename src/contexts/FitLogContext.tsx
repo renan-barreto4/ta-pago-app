@@ -18,6 +18,7 @@ interface FitLogContextType {
   addWorkoutType: (typeData: Omit<WorkoutType, 'id'>) => Promise<WorkoutType>;
   updateWorkoutType: (id: string, typeData: Partial<Omit<WorkoutType, 'id'>>) => Promise<void>;
   removeWorkoutType: (id: string) => Promise<void>;
+  reorderWorkoutTypes: (reorderedTypes: WorkoutType[]) => Promise<void>;
   loadWorkoutExercises: (workoutId: string) => Promise<Exercise[]>;
 }
 
