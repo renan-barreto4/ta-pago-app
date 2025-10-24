@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus, Scale, ChevronDown, Calendar as CalendarIcon } from 'lucide-react';
+import { Plus, Scale, ChevronDown, Calendar as CalendarIcon, Trash2, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +20,7 @@ const WeightTracker = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d' | '1y' | 'all'>('30d');
   const [currentWeight, setCurrentWeight] = useState(70);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const { weightEntries, addWeightEntry, updateWeightEntry, getFilteredEntries } = useWeightContext();
+  const { weightEntries, addWeightEntry, updateWeightEntry, deleteWeightEntry, getFilteredEntries, getLatestWeight } = useWeightContext();
   
   const filteredData = getFilteredEntries(selectedPeriod);
 
@@ -54,6 +54,12 @@ const WeightTracker = () => {
       fullDate: format(entry.date, 'dd/MM/yyyy')
     }));
 
+  // Calculate stats
+  const sortedEntries = [...weightEntries].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const initialWeight = sortedEntries[0]?.weight || 0;
+  const latestWeight = getLatestWeight()?.weight || 0;
+  const weightChange = latestWeight - initialWeight;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -78,6 +84,52 @@ const WeightTracker = () => {
           </div>
         </div>
       </Card>
+
+      {/* Stats Cards */}
+      {weightEntries.length > 0 && (
+        <div className="grid grid-cols-3 gap-4">
+          <Card className="p-4 bg-gradient-card shadow-card">
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground mb-1">Peso Inicial</p>
+              <p className="text-2xl font-bold text-foreground">{initialWeight} kg</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {sortedEntries[0] && format(sortedEntries[0].date, 'dd/MM/yyyy')}
+              </p>
+            </div>
+          </Card>
+          
+          <Card className="p-4 bg-gradient-card shadow-card">
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground mb-1">Peso Atual</p>
+              <p className="text-2xl font-bold text-foreground">{latestWeight} kg</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {getLatestWeight() && format(getLatestWeight()!.date, 'dd/MM/yyyy')}
+              </p>
+            </div>
+          </Card>
+          
+          <Card className="p-4 bg-gradient-card shadow-card">
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground mb-1">Variação</p>
+              <div className="flex items-center justify-center gap-1">
+                {weightChange > 0 ? (
+                  <TrendingUp className="h-4 w-4 text-red-500" />
+                ) : weightChange < 0 ? (
+                  <TrendingDown className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Minus className="h-4 w-4 text-muted-foreground" />
+                )}
+                <p className={cn(
+                  "text-2xl font-bold",
+                  weightChange > 0 ? "text-red-500" : weightChange < 0 ? "text-green-500" : "text-muted-foreground"
+                )}>
+                  {weightChange > 0 ? '+' : ''}{weightChange.toFixed(1)} kg
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {/* Chart */}
       <Card className="p-4 bg-gradient-card shadow-card">
@@ -175,6 +227,7 @@ const WeightTracker = () => {
                   <TableHead>Data</TableHead>
                   <TableHead>Peso</TableHead>
                   <TableHead>Variação</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -201,6 +254,16 @@ const WeightTracker = () => {
                             {difference > 0 ? '+' : ''}{difference.toFixed(1)} kg
                           </span>
                         )}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => deleteWeightEntry(entry.id)}
+                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   );
@@ -282,17 +345,22 @@ const WeightTracker = () => {
                 <label className="text-sm font-medium text-muted-foreground">Peso (kg)</label>
                 <Input
                   type="number"
-                  min="30"
-                  max="200"
+                  min="20"
+                  max="300"
                   step="0.1"
                   value={currentWeight}
-                  onChange={(e) => setCurrentWeight(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value) || 0;
+                    if (value >= 20 && value <= 300) {
+                      setCurrentWeight(value);
+                    }
+                  }}
                   placeholder="Ex: 70.5"
                   className="text-center text-lg font-medium"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Mínimo: 30 kg</span>
-                  <span>Máximo: 200 kg</span>
+                  <span>Mínimo: 20 kg</span>
+                  <span>Máximo: 300 kg</span>
                 </div>
               </div>
             </div>
