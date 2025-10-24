@@ -13,6 +13,7 @@ export default function Auth() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -36,6 +37,35 @@ export default function Auth() {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Email enviado!',
+        description: 'Verifique seu email para redefinir sua senha.',
+        duration: 7000,
+      });
+      
+      setIsForgotPassword(false);
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error.message || 'Ocorreu um erro. Tente novamente.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +94,23 @@ export default function Auth() {
           return;
         }
 
+        // Verificar se o email já está cadastrado
+        const { data: existingUser } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', email)
+          .maybeSingle();
+
+        if (existingUser) {
+          toast({
+            title: 'Erro',
+            description: 'Este email já está cadastrado. Faça login ou use outro email.',
+            variant: 'destructive',
+          });
+          setIsLoading(false);
+          return;
+        }
+
         // Criar conta
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -73,7 +120,20 @@ export default function Auth() {
           }
         });
 
-        if (error) throw error;
+        if (error) {
+          // Tratar erro específico de email já cadastrado
+          if (error.message.includes('already registered')) {
+            toast({
+              title: 'Erro',
+              description: 'Este email já está cadastrado. Faça login ou use outro email.',
+              variant: 'destructive',
+            });
+          } else {
+            throw error;
+          }
+          setIsLoading(false);
+          return;
+        }
 
         toast({
           title: 'Conta criada com sucesso!',
@@ -96,9 +156,19 @@ export default function Auth() {
         });
       }
     } catch (error: any) {
+      let errorMessage = 'Ocorreu um erro. Tente novamente.';
+      
+      if (error.message.includes('Invalid login credentials')) {
+        errorMessage = 'Email ou senha incorretos.';
+      } else if (error.message.includes('Email not confirmed')) {
+        errorMessage = 'Por favor, confirme seu email antes de fazer login.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       toast({
         title: 'Erro',
-        description: error.message || 'Ocorreu um erro. Tente novamente.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -117,16 +187,18 @@ export default function Auth() {
             </div>
           </div>
           <CardTitle className="text-2xl text-center">
-            {isSignUp ? 'Criar conta' : 'Entrar'}
+            {isForgotPassword ? 'Recuperar senha' : isSignUp ? 'Criar conta' : 'Entrar'}
           </CardTitle>
           <CardDescription className="text-center">
-            {isSignUp 
-              ? 'Crie sua conta para começar a treinar' 
-              : 'Entre com suas credenciais'}
+            {isForgotPassword
+              ? 'Digite seu email para receber o link de recuperação'
+              : isSignUp 
+                ? 'Crie sua conta para começar a treinar' 
+                : 'Entre com suas credenciais'}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleAuth} className="space-y-4">
+          <form onSubmit={isForgotPassword ? handleForgotPassword : handleAuth} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -139,35 +211,39 @@ export default function Auth() {
                 disabled={isLoading}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  disabled={isLoading}
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  disabled={isLoading}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
-            </div>
-            {isSignUp && (
+            {!isForgotPassword && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Senha</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={6}
+                      disabled={isLoading}
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      disabled={isLoading}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+            {isSignUp && !isForgotPassword && (
               <div className="space-y-2">
                 <Label htmlFor="confirm-password">Confirmar Senha</Label>
                 <div className="relative">
@@ -202,19 +278,38 @@ export default function Auth() {
               className="w-full" 
               disabled={isLoading}
             >
-              {isLoading ? 'Carregando...' : isSignUp ? 'Criar conta' : 'Entrar'}
+              {isLoading ? 'Carregando...' : isForgotPassword ? 'Enviar email' : isSignUp ? 'Criar conta' : 'Entrar'}
             </Button>
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                disabled={isLoading}
-              >
-                {isSignUp 
-                  ? 'Já tem uma conta? Entre aqui' 
-                  : 'Não tem conta? Cadastre-se'}
-              </button>
+            <div className="space-y-2">
+              {!isForgotPassword && !isSignUp && (
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotPassword(true)}
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                    disabled={isLoading}
+                  >
+                    Esqueci minha senha
+                  </button>
+                </div>
+              )}
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsForgotPassword(false);
+                    setIsSignUp(!isSignUp);
+                  }}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  disabled={isLoading}
+                >
+                  {isForgotPassword
+                    ? 'Voltar para login'
+                    : isSignUp 
+                      ? 'Já tem uma conta? Entre aqui' 
+                      : 'Não tem conta? Cadastre-se'}
+                </button>
+              </div>
             </div>
           </form>
         </CardContent>
