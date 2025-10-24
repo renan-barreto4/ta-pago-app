@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus, Scale, ChevronDown, Calendar as CalendarIcon, Trash2, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Plus, Scale, ChevronDown, Calendar as CalendarIcon, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useWeightContext } from '@/contexts/WeightContext';
 import { cn } from '@/lib/utils';
 
@@ -20,6 +21,8 @@ const WeightTracker = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d' | '1y' | 'all'>('30d');
   const [currentWeight, setCurrentWeight] = useState(70);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
   const { weightEntries, addWeightEntry, updateWeightEntry, deleteWeightEntry, getFilteredEntries, getLatestWeight } = useWeightContext();
   
   const filteredData = getFilteredEntries(selectedPeriod);
@@ -36,6 +39,19 @@ const WeightTracker = () => {
     }
     setIsModalOpen(false);
     setSelectedDate(new Date());
+  };
+
+  const handleDeleteClick = (entryId: string) => {
+    setEntryToDelete(entryId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (entryToDelete) {
+      deleteWeightEntry(entryToDelete);
+      setEntryToDelete(null);
+    }
+    setDeleteDialogOpen(false);
   };
 
   const periods = [
@@ -227,7 +243,6 @@ const WeightTracker = () => {
                   <TableHead>Data</TableHead>
                   <TableHead>Peso</TableHead>
                   <TableHead>Variação</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -238,7 +253,11 @@ const WeightTracker = () => {
                   const difference = previousEntry ? entry.weight - previousEntry.weight : 0;
                   
                   return (
-                    <TableRow key={entry.id}>
+                    <TableRow 
+                      key={entry.id}
+                      className="cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => handleDeleteClick(entry.id)}
+                    >
                       <TableCell>
                         {format(entry.date, 'dd/MM/yyyy', { locale: ptBR })}
                       </TableCell>
@@ -254,16 +273,6 @@ const WeightTracker = () => {
                             {difference > 0 ? '+' : ''}{difference.toFixed(1)} kg
                           </span>
                         )}
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => deleteWeightEntry(entry.id)}
-                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
                       </TableCell>
                     </TableRow>
                   );
@@ -389,6 +398,29 @@ const WeightTracker = () => {
           </div>
         </>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir registro de peso?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. O registro será permanentemente excluído.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteDialogOpen(false)}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
     </div>
   );
