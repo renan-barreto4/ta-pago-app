@@ -19,16 +19,27 @@ export default function ResetPassword() {
 
   useEffect(() => {
     // Verificar se há uma sessão de recuperação de senha
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // O Supabase automaticamente processa o token do link do email
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // Aguardar um pouco para o Supabase processar o token do email
       if (!session) {
-        toast({
-          title: 'Erro',
-          description: 'Link de recuperação inválido ou expirado.',
-          variant: 'destructive',
-        });
-        navigate('/auth');
+        setTimeout(async () => {
+          const { data: { session: newSession } } = await supabase.auth.getSession();
+          if (!newSession) {
+            toast({
+              title: 'Erro',
+              description: 'Link de recuperação inválido ou expirado. Solicite um novo link.',
+              variant: 'destructive',
+            });
+            navigate('/auth');
+          }
+        }, 1000);
       }
-    });
+    };
+    
+    checkSession();
   }, [navigate, toast]);
 
   const handleResetPassword = async (e: React.FormEvent) => {

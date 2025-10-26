@@ -43,8 +43,13 @@ export default function Auth() {
     setIsLoading(true);
 
     try {
+      // Usar a URL completa do projeto para garantir que funcione
+      const redirectUrl = window.location.origin.includes('lovableproject.com') 
+        ? `${window.location.origin}/reset-password`
+        : `${window.location.origin}/reset-password`;
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: redirectUrl,
       });
 
       if (error) throw error;
