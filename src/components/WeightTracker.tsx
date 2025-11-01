@@ -28,6 +28,12 @@ const WeightTracker = () => {
   const filteredData = getFilteredEntries(selectedPeriod);
 
   const handleSaveWeight = () => {
+    // Validar peso antes de salvar
+    if (currentWeight < 20 || currentWeight > 300) {
+      alert('Por favor, insira um peso entre 20 kg e 300 kg');
+      return;
+    }
+    
     const existingEntry = weightEntries.find(entry => 
       format(entry.date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
     );
@@ -354,18 +360,19 @@ const WeightTracker = () => {
                 <label className="text-sm font-medium text-muted-foreground">Peso (kg)</label>
                 <Input
                   type="number"
-                  min="20"
-                  max="300"
                   step="0.1"
                   value={currentWeight}
                   onChange={(e) => {
-                    const value = parseFloat(e.target.value) || 0;
-                    if (value >= 20 && value <= 300) {
+                    const value = parseFloat(e.target.value);
+                    if (!isNaN(value)) {
                       setCurrentWeight(value);
+                    } else if (e.target.value === '') {
+                      setCurrentWeight(0);
                     }
                   }}
                   placeholder="Ex: 70.5"
                   className="text-center text-lg font-medium"
+                  autoFocus
                 />
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Mínimo: 20 kg</span>
