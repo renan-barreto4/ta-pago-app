@@ -16,7 +16,6 @@ import { useWeightContext } from '@/contexts/WeightContext';
 import { cn } from '@/lib/utils';
 
 const WeightTracker = () => {
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d' | '1y' | 'all'>('30d');
   const [currentWeight, setCurrentWeight] = useState(70);
@@ -313,35 +312,22 @@ const WeightTracker = () => {
           <div className="space-y-6">
             {/* Date Selection */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Data</label>
-              <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !selectedDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {selectedDate ? format(selectedDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar data"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={(date) => {
-                      if (date) {
-                        setSelectedDate(date);
-                        setShowDatePicker(false);
-                      }
-                    }}
-                    initialFocus
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
+              <label className="text-sm font-medium text-muted-foreground text-center block">
+                Selecione a data
+              </label>
+              <div className="flex justify-center">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => {
+                    if (date) {
+                      setSelectedDate(date);
+                    }
+                  }}
+                  initialFocus
+                  className="pointer-events-auto rounded-md border"
+                />
+              </div>
             </div>
 
             {/* Weight Input */}
