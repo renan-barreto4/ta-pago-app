@@ -20,6 +20,7 @@ const WeightTracker = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d' | '1y' | 'all'>('30d');
   const [currentWeight, setCurrentWeight] = useState<number | ''>('');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
   const { weightEntries, addWeightEntry, updateWeightEntry, deleteWeightEntry, getFilteredEntries, getLatestWeight } = useWeightContext();
@@ -320,7 +321,7 @@ const WeightTracker = () => {
             {/* Date Selection */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Data</label>
-              <Popover>
+              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -340,6 +341,7 @@ const WeightTracker = () => {
                     onSelect={(date) => {
                       if (date) {
                         setSelectedDate(date);
+                        setDatePickerOpen(false);
                       }
                     }}
                     initialFocus
