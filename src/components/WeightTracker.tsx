@@ -299,7 +299,7 @@ const WeightTracker = () => {
       {/* Add Weight Modal */}
       {isModalOpen && (
         <>
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center">
             {/* Overlay */}
             <div 
               className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -307,7 +307,7 @@ const WeightTracker = () => {
             />
           
             {/* Modal */}
-            <Card className="relative z-10 w-full max-w-md mx-4 p-6 bg-card shadow-modal animate-scale-in">
+            <Card className="relative z-[110] w-full max-w-md mx-4 p-6 bg-card shadow-modal animate-scale-in">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-foreground">
