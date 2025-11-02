@@ -312,58 +312,58 @@ const WeightTracker = () => {
           <div className="space-y-6">
             {/* Date Selection */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground text-center block">
-                Selecione a data
-              </label>
-              <div className="flex justify-center">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(date) => {
-                    if (date) {
-                      setSelectedDate(date);
-                    }
-                  }}
-                  initialFocus
-                  className="pointer-events-auto rounded-md border"
-                />
-              </div>
-            </div>
-
-            {/* Weight Input */}
-            <div className="text-center">
-              <div className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-2">
-                {currentWeight} kg
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Digite o peso atual
-              </p>
+              <label className="text-sm font-medium text-muted-foreground">Data</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !selectedDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedDate ? format(selectedDate, 'dd/MM/yyyy', { locale: ptBR }) : <span>Selecione a data</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-[150]" align="center">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => {
+                      if (date) {
+                        setSelectedDate(date);
+                      }
+                    }}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Weight Input Field */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">Peso (kg)</label>
-                <Input
-                  type="number"
-                  step="0.1"
-                  value={currentWeight}
-                  onChange={(e) => {
-                    const value = parseFloat(e.target.value);
-                    if (!isNaN(value)) {
-                      setCurrentWeight(value);
-                    } else if (e.target.value === '') {
-                      setCurrentWeight(0);
-                    }
-                  }}
-                  placeholder="Ex: 70.5"
-                  className="text-center text-lg font-medium"
-                  autoFocus
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Mínimo: 20 kg</span>
-                  <span>Máximo: 300 kg</span>
-                </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Peso (kg)</label>
+              <Input
+                type="number"
+                step="0.1"
+                value={currentWeight}
+                onChange={(e) => {
+                  const value = parseFloat(e.target.value);
+                  if (!isNaN(value)) {
+                    setCurrentWeight(value);
+                  } else if (e.target.value === '') {
+                    setCurrentWeight(0);
+                  }
+                }}
+                placeholder="Ex: 70.5"
+                className="text-center text-lg font-medium"
+                autoFocus
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Mínimo: 20 kg</span>
+                <span>Máximo: 300 kg</span>
               </div>
             </div>
 
