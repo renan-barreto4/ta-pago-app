@@ -191,7 +191,7 @@ export const WorkoutModal = ({ isOpen, onClose, selectedDate, existingWorkout, s
                     <Edit3 className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
+                <PopoverContent className="w-auto p-0 z-[150]" align="end">
                   <Calendar
                     mode="single"
                     selected={workoutDate}
