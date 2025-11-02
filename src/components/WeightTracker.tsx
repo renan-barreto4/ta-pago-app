@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 const WeightTracker = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d' | '1y' | 'all'>('30d');
-  const [currentWeight, setCurrentWeight] = useState(70);
+  const [currentWeight, setCurrentWeight] = useState<number | ''>('');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
@@ -27,6 +27,12 @@ const WeightTracker = () => {
   const filteredData = getFilteredEntries(selectedPeriod);
 
   const handleSaveWeight = () => {
+    // Validar se o peso foi preenchido
+    if (currentWeight === '' || currentWeight === 0) {
+      alert('Por favor, insira um peso válido');
+      return;
+    }
+    
     // Validar peso antes de salvar
     if (currentWeight < 20 || currentWeight > 300) {
       alert('Por favor, insira um peso entre 20 kg e 300 kg');
@@ -38,12 +44,13 @@ const WeightTracker = () => {
     );
     
     if (existingEntry) {
-      updateWeightEntry(existingEntry.id, currentWeight, selectedDate);
+      updateWeightEntry(existingEntry.id, currentWeight as number, selectedDate);
     } else {
-      addWeightEntry(currentWeight, selectedDate);
+      addWeightEntry(currentWeight as number, selectedDate);
     }
     setIsModalOpen(false);
     setSelectedDate(new Date());
+    setCurrentWeight('');
   };
 
   const handleDeleteClick = (entryId: string) => {
@@ -350,11 +357,13 @@ const WeightTracker = () => {
                 step="0.1"
                 value={currentWeight}
                 onChange={(e) => {
-                  const value = parseFloat(e.target.value);
-                  if (!isNaN(value)) {
-                    setCurrentWeight(value);
-                  } else if (e.target.value === '') {
-                    setCurrentWeight(0);
+                  if (e.target.value === '') {
+                    setCurrentWeight('');
+                  } else {
+                    const value = parseFloat(e.target.value);
+                    if (!isNaN(value)) {
+                      setCurrentWeight(value);
+                    }
                   }
                 }}
                 placeholder="Ex: 70.5"
@@ -374,6 +383,7 @@ const WeightTracker = () => {
                 onClick={() => {
                   setIsModalOpen(false);
                   setSelectedDate(new Date());
+                  setCurrentWeight('');
                 }}
                 className="flex-1"
               >
